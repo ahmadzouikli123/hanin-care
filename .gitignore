@@ -52,3 +52,5 @@ out/
 # OS
 .DS_Store
 Thumbs.db
+
+public/logo.png
