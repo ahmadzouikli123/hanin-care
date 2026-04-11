@@ -27,7 +27,7 @@ export default function LoginPage() {
       <div style={{ flex: 1, background: "linear-gradient(135deg,var(--primary-dark),var(--primary))", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "white", padding: "3rem", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: -80, right: -80, width: 400, height: 400, background: "rgba(255,255,255,0.05)", borderRadius: "50%" }} />
         <div style={{ position: "relative", zIndex: 1, textAlign: "center", maxWidth: 400 }}>
-          <div style={{ fontSize: "3.5rem", marginBottom: "1.5rem" }}>🏥</div>
+          <div style={{ marginBottom: "1.5rem" }}><img src="/logo.png" alt="Hanin" style={{ width: "90px", height: "90px", objectFit: "contain" }} /></div>
           <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: "2.2rem", marginBottom: "1rem" }}>
             Hanin Care <span style={{ color: "var(--accent-green)" }}>Canada</span>
           </h1>
