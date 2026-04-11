@@ -1,51 +1,7 @@
-﻿"use client"
+"use client"
 import { useState } from "react"
 import Link from "next/link"
-
-const CURRICULUM = [
-  {
-    level:"beginner", label:"Beginner", color:"var(--beg)", bg:"var(--beg-bg)", border:"#A8D9E8",
-    headerBg:"linear-gradient(135deg,#E8F5F9,#D1EBF3)", icon:"🌱",
-    desc:"Build a solid foundation in personal support work — essential skills, safety protocols, and person-centred care.",
-    units:[
-      { num:1, title:"Role of the PSW in Canadian Healthcare",        duration:"45 min", questions:15 },
-      { num:2, title:"Infection Control and Hand Hygiene",            duration:"40 min", questions:12 },
-      { num:3, title:"Personal Care and Activities of Daily Living",  duration:"55 min", questions:18 },
-      { num:4, title:"Communication and Interpersonal Skills",        duration:"35 min", questions:10 },
-      { num:5, title:"Safety and Fall Prevention",                    duration:"50 min", questions:15 },
-      { num:6, title:"Nutrition and Hydration Assistance",            duration:"40 min", questions:12 },
-      { num:7, title:"Documentation and Reporting",                   duration:"30 min", questions:10 },
-    ]
-  },
-  {
-    level:"intermediate", label:"Intermediate", color:"var(--int)", bg:"var(--int-bg)", border:"#FCD34D",
-    headerBg:"linear-gradient(135deg,#FFFBEB,#FEF3C7)", icon:"📈",
-    desc:"Advance your skills in complex care needs, cognitive conditions, and professional practice.",
-    units:[
-      { num:8,  title:"Dementia and Alzheimer Care",              duration:"60 min", questions:20 },
-      { num:9,  title:"Mental Health Support in PSW Practice",    duration:"50 min", questions:16 },
-      { num:10, title:"Palliative and End-of-Life Care",          duration:"55 min", questions:18 },
-      { num:11, title:"Mobility Assistance and Transfers",        duration:"50 min", questions:15 },
-      { num:12, title:"Medication Awareness",                     duration:"45 min", questions:14 },
-      { num:13, title:"Chronic Condition Management",             duration:"60 min", questions:20 },
-      { num:14, title:"Cultural Competency and Diversity",        duration:"40 min", questions:12 },
-    ]
-  },
-  {
-    level:"advanced", label:"Advanced", color:"var(--adv)", bg:"var(--adv-bg)", border:"#C4B5FD",
-    headerBg:"linear-gradient(135deg,#F5F3FF,#EDE9FE)", icon:"🏆",
-    desc:"Master leadership, complex clinical situations, and specialty care for senior PSW professionals.",
-    units:[
-      { num:15, title:"Responsive Behaviours and De-escalation",   duration:"65 min", questions:22 },
-      { num:16, title:"Complex Wound Care Awareness",               duration:"55 min", questions:18 },
-      { num:17, title:"Ethical Decision-Making in PSW",             duration:"50 min", questions:16 },
-      { num:18, title:"Family Dynamics and Caregiver Support",      duration:"45 min", questions:14 },
-      { num:19, title:"Leadership and Mentoring in Care Settings",  duration:"50 min", questions:16 },
-      { num:20, title:"Technology in Modern PSW Practice",          duration:"40 min", questions:12 },
-      { num:21, title:"Capstone: Integrated Case Studies",          duration:"90 min", questions:30 },
-    ]
-  }
-]
+import { CURRICULUM_STRUCTURE } from "@/lib/curriculum-data"
 
 export default function CurriculumPage() {
   const [openUnit, setOpenUnit] = useState<string|null>(null)
@@ -62,9 +18,9 @@ export default function CurriculumPage() {
           <h1 style={{ fontFamily:"'Playfair Display',serif", fontSize:"2.5rem", marginBottom:"0.75rem" }}>
             PSW Training <span style={{ color:"var(--accent-green)" }}>Curriculum</span>
           </h1>
-          <p style={{ opacity:0.85, maxWidth:650, lineHeight:1.8, marginBottom:"1.5rem" }}>21 units across 3 levels — from foundations to advanced clinical practice, aligned with Canadian PSW standards.</p>
+          <p style={{ opacity:0.85, maxWidth:650, lineHeight:1.8, marginBottom:"1.5rem" }}>27 units across 3 levels — from foundations to advanced clinical practice, aligned with Canadian PSW standards (Ontario, BC, Alberta).</p>
           <div style={{ display:"flex", gap:"1rem", flexWrap:"wrap" }}>
-            {[{ icon:"📚", text:"21 Units" },{ icon:"🧠", text:"500+ Questions" },{ icon:"⏱️", text:"~18 Hours" },{ icon:"🇨🇦", text:"Canadian Standards" }].map(({ icon, text }) => (
+            {[{ icon:"📚", text:"27 Units" },{ icon:"⏱️", text:"600+ Hours" },{ icon:"🧠", text:"100+ Questions" },{ icon:"🇨🇦", text:"Canadian Standards" }].map(({ icon, text }) => (
               <div key={text} style={{ display:"inline-flex", alignItems:"center", gap:"0.5rem", background:"rgba(255,255,255,0.12)", border:"1px solid rgba(255,255,255,0.2)", padding:"0.4rem 1rem", borderRadius:20, fontSize:"0.85rem" }}>{icon} {text}</div>
             ))}
           </div>
@@ -72,7 +28,7 @@ export default function CurriculumPage() {
       </div>
 
       <div style={{ maxWidth:1400, margin:"0 auto", padding:"2.5rem 2rem" }}>
-        {CURRICULUM.map(lv => (
+        {CURRICULUM_STRUCTURE.map(lv => (
           <div key={lv.level} style={{ marginBottom:"4rem" }}>
             <div style={{ background:lv.headerBg, border:`2px solid ${lv.border}`, borderRadius:20, padding:"2.5rem", marginBottom:"2rem" }}>
               <div style={{ display:"inline-flex", alignItems:"center", gap:"0.5rem", background:lv.color, color:"white", borderRadius:20, padding:"0.4rem 1rem", fontSize:"0.82rem", fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:"1rem" }}>{lv.icon} {lv.label}</div>
@@ -80,7 +36,7 @@ export default function CurriculumPage() {
               <p style={{ color:"var(--text-light)", maxWidth:700, lineHeight:1.8 }}>{lv.desc}</p>
               <div style={{ display:"flex", gap:"2rem", marginTop:"1.5rem", flexWrap:"wrap" }}>
                 <span style={{ display:"flex", alignItems:"center", gap:"0.5rem", fontSize:"0.88rem", fontWeight:600, color:lv.color }}>📖 {lv.units.length} Units</span>
-                <span style={{ display:"flex", alignItems:"center", gap:"0.5rem", fontSize:"0.88rem", fontWeight:600, color:lv.color }}>❓ {lv.units.reduce((a,u)=>a+u.questions,0)} Questions</span>
+                <span style={{ display:"flex", alignItems:"center", gap:"0.5rem", fontSize:"0.88rem", fontWeight:600, color:lv.color }}>⏱️ {lv.hours} Hours</span>
               </div>
             </div>
 
@@ -103,13 +59,17 @@ export default function CurriculumPage() {
                     <span style={{ color:"var(--text-light)", transform:isOpen?"rotate(180deg)":"rotate(0)", transition:"transform 0.3s", fontSize:"1.2rem" }}>▾</span>
                   </div>
                   {isOpen && (
-                    <div style={{ borderTop:"1px solid var(--border)", padding:"2rem" }}>
-                      <div style={{ background:"var(--bg)", borderRadius:12, padding:"1.25rem", marginBottom:"1.5rem" }}>
-                        <p style={{ color:"var(--text-light)", fontSize:"0.93rem", lineHeight:1.8 }}>This unit covers key competencies for Canadian PSW practice. Complete the theory section, then test your knowledge with the quiz.</p>
-                      </div>
+                    <div style={{ borderTop:"1px solid var(--border)", padding:"1.5rem 2rem" }}>
+                      <p style={{ color:"var(--text-light)", fontSize:"0.93rem", lineHeight:1.8, marginBottom:"1.5rem" }}>
+                        This unit covers key competencies for Canadian PSW practice aligned with {lv.label.toLowerCase()} level standards. Complete the theory, quiz, and case study to master this unit.
+                      </p>
                       <div style={{ display:"flex", gap:"1rem", flexWrap:"wrap" }}>
-                        <button style={{ background:lv.color, color:"white", padding:"0.7rem 1.5rem", borderRadius:10, border:"none", fontWeight:600, cursor:"pointer", fontSize:"0.9rem", fontFamily:"inherit" }}>📖 Study Theory</button>
-                        <Link href="/dashboard/quiz/1" style={{ background:lv.bg, color:lv.color, padding:"0.7rem 1.5rem", borderRadius:10, fontWeight:600, fontSize:"0.9rem", textDecoration:"none", display:"inline-block" }}>🧠 Take Quiz →</Link>
+                        <Link href={`/dashboard/unit/${unit.num}`} style={{ background:lv.color, color:"white", padding:"0.7rem 1.5rem", borderRadius:10, fontWeight:600, fontSize:"0.9rem", textDecoration:"none", display:"inline-block" }}>
+                          📖 Study Unit {unit.num} →
+                        </Link>
+                        <Link href={`/dashboard/unit/${unit.num}#quiz`} style={{ background:lv.bg, color:lv.color, padding:"0.7rem 1.5rem", borderRadius:10, fontWeight:600, fontSize:"0.9rem", textDecoration:"none", display:"inline-block" }}>
+                          🧠 Take Quiz →
+                        </Link>
                       </div>
                     </div>
                   )}
@@ -125,4 +85,3 @@ export default function CurriculumPage() {
     </div>
   )
 }
-
