@@ -1,5 +1,6 @@
 "use client"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 
@@ -14,19 +15,19 @@ export default function Navbar() {
   }
 
   const links = [
-    { href: "/dashboard",            label: "Dashboard"   },
-    { href: "/dashboard/curriculum", label: "Curriculum"  },
-    { href: "/dashboard/quiz/1",     label: "Quizzes"     },
+    { href: "/dashboard",            label: "Dashboard"  },
+    { href: "/dashboard/curriculum", label: "Curriculum" },
+    { href: "/dashboard/quiz/1",     label: "Quizzes"    },
   ]
 
   return (
-    <nav style={{ background: "#fff", boxShadow: "0 2px 20px rgba(15,90,138,0.08)", position: "fixed", top: 0, width: "100%", zIndex: 1000, padding: "0.9rem 2rem", borderBottom: "3px solid var(--primary)" }}>
+    <nav style={{ background: "#fff", boxShadow: "0 2px 20px rgba(15,90,138,0.08)", position: "fixed", top: 0, width: "100%", zIndex: 1000, padding: "0.7rem 2rem", borderBottom: "3px solid var(--primary)" }}>
       <div style={{ maxWidth: 1400, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: "0.6rem", textDecoration: "none" }}>
-          <div style={{ width: 42, height: 42, background: "var(--primary)", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "1.2rem" }}>🏥</div>
+        <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: "0.75rem", textDecoration: "none" }}>
+          <img src="/logo.png" alt="Hanin Care" style={{ width: 46, height: 46, objectFit: "contain" }} />
           <div>
-            <span style={{ fontFamily: "'Playfair Display',serif", fontSize: "1.5rem", fontWeight: 800, color: "var(--primary)" }}>Hanin Care</span>
-            <span style={{ fontSize: "0.6rem", fontWeight: 500, color: "var(--text-light)", letterSpacing: 2, textTransform: "uppercase", display: "block" }}>Canada · PSW Training</span>
+            <span style={{ fontFamily: "\"Playfair Display\",serif", fontSize: "1.4rem", fontWeight: 800, color: "var(--primary)" }}>Hanin Care</span>
+            <span style={{ fontSize: "0.58rem", fontWeight: 500, color: "var(--text-light)", letterSpacing: 2, textTransform: "uppercase", display: "block" }}>Canada · PSW Training</span>
           </div>
         </Link>
         <ul style={{ display: "flex", gap: "0.25rem", listStyle: "none", alignItems: "center" }}>
