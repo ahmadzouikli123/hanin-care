@@ -1,112 +1,279 @@
-"use client"
-import { useState } from "react"
-import Link from "next/link"
+"use client";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 
-const Q = [
-  { id:1, unit:"Unit 1", level:"beginner", diff:"easy", type:"mcq", text:"What is the primary role of a PSW in Canadian healthcare?", options:[{l:"A",t:"Diagnose medical conditions"},{l:"B",t:"Provide personal care and assist with daily living"},{l:"C",t:"Perform surgical procedures"},{l:"D",t:"Manage hospital administration"}], correct:"B", exp:"PSWs provide personal care and assist with ADLs under supervision of regulated health professionals." },
-  { id:2, unit:"Unit 2", level:"beginner", diff:"easy", type:"mcq", text:"How long should you wash hands according to Canadian guidelines?", options:[{l:"A",t:"5 seconds"},{l:"B",t:"10 seconds"},{l:"C",t:"20 seconds"},{l:"D",t:"60 seconds"}], correct:"C", exp:"Health Canada recommends at least 20 seconds of hand washing with soap and water." },
-  { id:3, unit:"Unit 5", level:"beginner", diff:"medium", type:"mcq", text:"You notice a wet floor near the bathroom. What is your FIRST action?", options:[{l:"A",t:"Document and report at shift end"},{l:"B",t:"Ask client to avoid the area"},{l:"C",t:"Place a warning sign and clean or report immediately"},{l:"D",t:"Ignore it if client is not nearby"}], correct:"C", exp:"Immediate action prevents falls. Place a wet floor sign and clean or report to supervisor right away." },
-  { id:4, unit:"Unit 8", level:"intermediate", diff:"medium", type:"mcq", text:"A dementia client becomes agitated and refuses care. Best approach?", options:[{l:"A",t:"Insist on completing care"},{l:"B",t:"Pause, use calm tone, redirect and try again later"},{l:"C",t:"Restrain the client for safety"},{l:"D",t:"Skip care for the day"}], correct:"B", exp:"Person-centred care means pausing, speaking calmly, and redirecting. Restraint is never a first response." },
-  { id:5, unit:"Unit 10", level:"intermediate", diff:"hard", type:"true_false", text:"TRUE or FALSE: In palliative care, the goal is to cure the disease and extend life at all costs.", options:[{l:"T",t:"True"},{l:"F",t:"False"}], correct:"F", exp:"Palliative care focuses on comfort, dignity and quality of life — not cure. It honours the client wishes." },
-]
+const BG = "#060910";
+const SURFACE = "#0d1117";
+const ACCENT = "#00ff87";
+const MUTED = "#64748b";
+const TEXT = "#e2e8f0";
+const BORDER = "rgba(255,255,255,0.07)";
+const RED = "#ff4757";
+const GREEN = "#00ff87";
 
-const DC: Record<string,any> = { easy:{bg:"#DCFCE7",color:"#166534"}, medium:{bg:"#FEF3C7",color:"#92400E"}, hard:{bg:"#FEE2E2",color:"#991B1B"} }
-const LC: Record<string,any> = { beginner:{bg:"var(--beg-bg)",color:"var(--beg)"}, intermediate:{bg:"var(--int-bg)",color:"var(--int)"} }
+const questions = [
+  { question: "What is a bug in software testing?", options: ["A planned feature", "An error or defect in the software", "A design document"], answer: 1 },
+  { question: "What does QA stand for?", options: ["Quality Assurance", "Quick Access", "Query Analysis"], answer: 0 },
+  { question: "What is regression testing?", options: ["Testing new features only", "Testing after fixing bugs to ensure nothing broke", "Testing UI design"], answer: 1 },
+  { question: "What is a test case?", options: ["Steps to verify functionality", "A bug report", "A deployment script"], answer: 0 },
+  { question: "What does UAT stand for?", options: ["User Acceptance Testing", "Universal App Testing", "User Automation Tool"], answer: 0 },
+  { question: "What is smoke testing?", options: ["Testing for performance", "A preliminary test to check basic functionality", "Security testing"], answer: 1 },
+  { question: "What is the difference between verification and validation?", options: ["They are the same", "Verification checks the process, validation checks the product", "Validation checks the process, verification checks the product"], answer: 1 },
+  { question: "What is a test plan?", options: ["A document outlining the testing strategy and scope", "A list of bugs", "A deployment checklist"], answer: 0 },
+  { question: "What is black-box testing?", options: ["Testing with knowledge of internal code", "Testing without knowledge of internal code", "Testing hardware components"], answer: 1 },
+  { question: "What is white-box testing?", options: ["Testing without knowledge of internal code", "Testing with knowledge of internal code", "Testing UI only"], answer: 1 },
+  { question: "What is exploratory testing?", options: ["Automated testing", "Unscripted testing where tester explores the application", "Performance testing"], answer: 1 },
+  { question: "What does SDLC stand for?", options: ["Software Development Life Cycle", "System Design Logic Check", "Software Deployment Launch Control"], answer: 0 },
+  { question: "What is a test suite?", options: ["A collection of test cases", "A single test case", "A bug tracking tool"], answer: 0 },
+  { question: "What is boundary value analysis?", options: ["Testing at the boundaries of input ranges", "Testing random values", "Testing database connections"], answer: 0 },
+  { question: "What is equivalence partitioning?", options: ["Dividing inputs into equivalent classes to reduce test cases", "Testing all possible inputs", "Splitting code into modules"], answer: 0 },
+  { question: "What is load testing?", options: ["Testing how many bugs exist", "Testing system performance under expected load", "Testing UI responsiveness"], answer: 1 },
+  { question: "What is stress testing?", options: ["Testing beyond normal capacity to find breaking point", "Testing under normal conditions", "Testing with a small dataset"], answer: 0 },
+  { question: "What is a defect lifecycle?", options: ["The stages a bug goes through from discovery to closure", "The software release cycle", "The QA hiring process"], answer: 0 },
+  { question: "What is sanity testing?", options: ["Full regression after a major change", "A quick check to verify a specific function works after a fix", "Performance benchmarking"], answer: 1 },
+  { question: "What does API stand for?", options: ["Application Programming Interface", "Automated Program Integration", "Applied Process Index"], answer: 0 },
+  { question: "What is usability testing?", options: ["Testing how easy the software is to use", "Testing server response time", "Testing code coverage"], answer: 0 },
+  { question: "What is the purpose of a bug report?", options: ["To document a defect so it can be reproduced and fixed", "To approve a release", "To plan a sprint"], answer: 0 },
+  { question: "What is test coverage?", options: ["The percentage of code exercised by tests", "The number of testers on a project", "The time taken to run tests"], answer: 0 },
+  { question: "What is a test environment?", options: ["The setup where testing is performed", "The production server", "A developer's local machine only"], answer: 0 },
+  { question: "What is performance testing?", options: ["Testing functionality", "Evaluating system speed, scalability, and stability", "Testing user interfaces"], answer: 1 },
+  { question: "What is security testing?", options: ["Checking for vulnerabilities and unauthorized access", "Testing login UI design", "Checking color contrast"], answer: 0 },
+  { question: "What is compatibility testing?", options: ["Testing across different browsers, OS, and devices", "Testing one browser only", "Testing database schemas"], answer: 0 },
+  { question: "What is a mock object in testing?", options: ["A simulated object that mimics real dependencies", "A real database record", "A production server"], answer: 0 },
+  { question: "What is unit testing?", options: ["Testing the entire application", "Testing individual components or functions", "Testing user flows"], answer: 1 },
+  { question: "What is integration testing?", options: ["Testing individual units in isolation", "Testing how different modules work together", "Testing the final product with end users"], answer: 1 },
+  { question: "What is end-to-end testing?", options: ["Testing one function", "Testing the complete user workflow from start to finish", "Testing database queries"], answer: 1 },
+  { question: "What is a flaky test?", options: ["A test that always fails", "A test that passes and fails inconsistently", "A test with no assertions"], answer: 1 },
+  { question: "What does CI/CD stand for?", options: ["Continuous Integration / Continuous Delivery", "Code Inspection / Code Deployment", "Component Integration / Component Design"], answer: 0 },
+  { question: "What is test-driven development (TDD)?", options: ["Writing tests after code", "Writing tests before writing the code", "Testing only in production"], answer: 1 },
+  { question: "What is the purpose of a test report?", options: ["To summarize testing activities and results", "To plan future features", "To document server configurations"], answer: 0 },
+  { question: "What is a critical bug severity?", options: ["Minor cosmetic issue", "A defect that crashes the system or blocks major functionality", "A spelling mistake in UI"], answer: 1 },
+  { question: "What is accessibility testing?", options: ["Checking if the app works for users with disabilities", "Testing mobile screen sizes", "Load testing"], answer: 0 },
+  { question: "What is a test stub?", options: ["A placeholder that simulates a module not yet developed", "A completed module", "A test result"], answer: 0 },
+  { question: "What is the V-model in testing?", options: ["A testing model where each development phase has a corresponding test phase", "A performance testing framework", "An agile methodology"], answer: 0 },
+  { question: "What is retesting?", options: ["Re-running all tests", "Testing a specific bug after it has been fixed", "Running tests on a new feature"], answer: 1 },
+  { question: "What is a release candidate?", options: ["A version ready for final testing before production release", "A developer's local build", "A test environment backup"], answer: 0 },
+  { question: "What is mutation testing?", options: ["Changing requirements during testing", "Modifying code slightly to check if tests catch the changes", "Testing on different operating systems"], answer: 1 },
+  { question: "What is a test harness?", options: ["A collection of software used to run tests automatically", "A physical testing device", "A bug tracking tool"], answer: 0 },
+  { question: "What is risk-based testing?", options: ["Testing everything equally", "Prioritizing tests based on risk and impact", "Testing only low-risk areas"], answer: 1 },
+  { question: "What is severity vs priority in bug tracking?", options: ["They always mean the same thing", "Severity is the impact of the bug; priority is how urgently it should be fixed", "Priority is the impact; severity is urgency"], answer: 1 },
+  { question: "What is static testing?", options: ["Running the application to find bugs", "Reviewing code or documents without executing the program", "Automated UI testing"], answer: 1 },
+  { question: "What is dynamic testing?", options: ["Reviewing code without running it", "Executing the software to find defects", "Analyzing requirements only"], answer: 1 },
+  { question: "What is code review in QA?", options: ["Running automated tests", "Manually examining source code to find errors", "Deploying code to production"], answer: 1 },
+  { question: "What is a test oracle?", options: ["A tool that predicts test results", "A mechanism to determine whether a test passed or failed", "A testing database"], answer: 1 },
+  { question: "What is agile testing?", options: ["Testing done only at the end of a project", "Testing integrated throughout the agile development cycle", "Manual testing without any planning"], answer: 1 },
+];
 
-export default function QuizPage() {
-  const [answers, setAnswers] = useState<Record<number,string>>({})
-  const [shown, setShown]     = useState<Record<number,boolean>>({})
-  const [finished, setFinished] = useState(false)
+export default function Quiz() {
+  const [current, setCurrent] = useState(0);
+  const [score, setScore] = useState(0);
+  const [selected, setSelected] = useState<number | null>(null);
+  const [time, setTime] = useState(600);
+  const [finished, setFinished] = useState(false);
 
-  const answer = (qId: number, l: string) => {
-    if (shown[qId]) return
-    setAnswers(a => ({ ...a, [qId]: l }))
-    setShown(s => ({ ...s, [qId]: true }))
+  useEffect(() => {
+    if (finished) return;
+    const timer = setInterval(() => setTime((t) => {
+      if (t <= 1) { setFinished(true); return 0; }
+      return t - 1;
+    }), 1000);
+    return () => clearInterval(timer);
+  }, [finished]);
+
+  const handleAnswer = (index: number) => {
+    if (selected !== null) return;
+    setSelected(index);
+    if (index === questions[current].answer) setScore((s) => s + 1);
+  };
+
+  const nextQuestion = () => {
+    if (current + 1 >= questions.length) { setFinished(true); return; }
+    setCurrent((c) => c + 1);
+    setSelected(null);
+  };
+
+  const restart = () => {
+    setCurrent(0); setScore(0);
+    setSelected(null); setTime(600); setFinished(false);
+  };
+
+  const progress = ((current + 1) / questions.length) * 100;
+  const mins = Math.floor(time / 60);
+  const secs = String(time % 60).padStart(2, "0");
+  const pct = Math.round((score / questions.length) * 100);
+
+  // ── FINISHED SCREEN ──
+  if (finished) {
+    const passed = pct >= 70;
+    return (
+      <div style={{ minHeight: "100vh", background: BG, color: TEXT, fontFamily: "Arial, sans-serif", display: "flex", flexDirection: "column" }}>
+        <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, padding: "0 40px", height: 64, display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(6,9,16,0.92)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${BORDER}` }}>
+          <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: ACCENT, boxShadow: `0 0 10px ${ACCENT}` }} />
+            <span style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: ACCENT, letterSpacing: 2 }}>QA_PLATFORM</span>
+          </Link>
+        </nav>
+
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "100px 20px 40px" }}>
+          <div style={{ textAlign: "center", maxWidth: 500, width: "100%" }}>
+            <div style={{ fontSize: 72, marginBottom: 16 }}>{passed ? "🏆" : "📝"}</div>
+            <div style={{ fontFamily: "monospace", fontSize: 11, color: ACCENT, textTransform: "uppercase", letterSpacing: 3, marginBottom: 16 }}>
+              // Quiz Complete
+            </div>
+            <h1 style={{ fontSize: 56, fontWeight: 900, letterSpacing: -2, marginBottom: 8, color: passed ? ACCENT : TEXT }}>
+              {pct}%
+            </h1>
+            <p style={{ color: MUTED, fontFamily: "monospace", fontSize: 14, marginBottom: 48 }}>
+              You answered {score} out of {questions.length} questions correctly
+            </p>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 48 }}>
+              {[
+                { label: "Correct", value: score, color: GREEN },
+                { label: "Wrong", value: questions.length - score, color: RED },
+                { label: "Score", value: `${pct}%`, color: passed ? GREEN : "#f59e0b" },
+              ].map((item) => (
+                <div key={item.label} style={{ padding: "20px 12px", background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 10, textAlign: "center" }}>
+                  <div style={{ fontSize: 24, fontWeight: 800, color: item.color, fontFamily: "monospace" }}>{item.value}</div>
+                  <div style={{ fontSize: 11, color: MUTED, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: 1, marginTop: 4 }}>{item.label}</div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+              <button onClick={restart} style={{ padding: "14px 32px", background: ACCENT, color: "#000", fontFamily: "monospace", fontSize: 13, fontWeight: 700, border: "none", borderRadius: 8, cursor: "pointer", textTransform: "uppercase", letterSpacing: 1 }}>
+                Try Again →
+              </button>
+              <Link href="/" style={{ padding: "14px 32px", border: `1px solid ${BORDER}`, color: MUTED, fontFamily: "monospace", fontSize: 13, textDecoration: "none", borderRadius: 8, textTransform: "uppercase", letterSpacing: 1, display: "inline-flex", alignItems: "center" }}>
+                Home
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
-  const score  = Q.filter(q => answers[q.id] === q.correct).length
-  const pct    = finished ? Math.round((score/Q.length)*100) : 0
-  const passed = pct >= 70
-
+  // ── QUIZ SCREEN ──
   return (
-    <div style={{ background:"var(--bg)", minHeight:"100vh" }}>
-      <div style={{ background:"linear-gradient(135deg,var(--primary-dark),var(--primary))", color:"white", padding:"3rem 2rem 2.5rem" }}>
-        <div style={{ maxWidth:1000, margin:"0 auto" }}>
-          <div style={{ fontSize:"0.82rem", opacity:0.7, marginBottom:"1rem" }}>
-            <Link href="/dashboard" style={{ color:"white", textDecoration:"none" }}>Dashboard</Link> › <Link href="/dashboard/curriculum" style={{ color:"white", textDecoration:"none" }}>Curriculum</Link> › Quiz
-          </div>
-          <h1 style={{ fontFamily:"\"Playfair Display\",serif", fontSize:"2.2rem", marginBottom:"0.5rem" }}>Practice <span style={{ color:"var(--accent-green)" }}>Quiz</span></h1>
-          <p style={{ opacity:0.8, marginBottom:"1.5rem" }}>Mixed questions — Beginner and Intermediate levels</p>
-          <div style={{ display:"flex", gap:"2rem" }}>
-            {[{num:Q.length,label:"Questions"},{num:"70%",label:"Pass Mark"},{num:Object.keys(shown).length,label:"Answered"}].map(({num,label})=>(
-              <div key={label}><span style={{ fontFamily:"\"Playfair Display\",serif", fontSize:"1.8rem", fontWeight:700, color:"var(--accent-green)", display:"block" }}>{num}</span><span style={{ fontSize:"0.78rem", opacity:0.7 }}>{label}</span></div>
-            ))}
-          </div>
+    <div style={{ minHeight: "100vh", background: BG, color: TEXT, fontFamily: "Arial, sans-serif" }}>
+
+      {/* NAV */}
+      <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, padding: "0 40px", height: 64, display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(6,9,16,0.92)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${BORDER}` }}>
+        <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: ACCENT, boxShadow: `0 0 10px ${ACCENT}` }} />
+          <span style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: ACCENT, letterSpacing: 2 }}>QA_PLATFORM</span>
+        </Link>
+        {/* Timer */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "monospace", fontSize: 14, color: time < 60 ? RED : MUTED }}>
+          <span style={{ fontSize: 16 }}>⏱</span>
+          {mins}:{secs}
         </div>
+      </nav>
+
+      {/* PROGRESS BAR */}
+      <div style={{ position: "fixed", top: 64, left: 0, right: 0, height: 3, background: BORDER, zIndex: 99 }}>
+        <div style={{ height: "100%", width: `${progress}%`, background: ACCENT, transition: "width 0.4s ease", boxShadow: `0 0 10px ${ACCENT}` }} />
       </div>
 
-      <div style={{ background:"white", borderBottom:"1px solid var(--border)", padding:"1rem 2rem", position:"sticky", top:78, zIndex:900 }}>
-        <div style={{ maxWidth:1000, margin:"0 auto", display:"flex", alignItems:"center", gap:"1.5rem" }}>
-          <span style={{ fontFamily:"\"Playfair Display\",serif", fontSize:"1.3rem", fontWeight:700, color:"var(--primary)" }}>{Object.keys(shown).length}/{Q.length}</span>
-          <div style={{ flex:1, height:8, background:"var(--border)", borderRadius:4 }}><div style={{ width:`${(Object.keys(shown).length/Q.length)*100}%`, height:"100%", background:"var(--primary)", borderRadius:4, transition:"width 0.4s" }} /></div>
-          {Object.keys(shown).length===Q.length && !finished && (
-            <button onClick={()=>setFinished(true)} style={{ background:"var(--primary)", color:"white", padding:"0.65rem 1.5rem", borderRadius:10, border:"none", fontWeight:700, cursor:"pointer", fontFamily:"inherit" }}>Submit Quiz →</button>
-          )}
-        </div>
-      </div>
+      {/* MAIN */}
+      <div style={{ maxWidth: 720, margin: "0 auto", padding: "110px 24px 60px" }}>
 
-      <div style={{ maxWidth:1000, margin:"0 auto", padding:"2.5rem 2rem" }}>
-        {finished && (
-          <div style={{ background:passed?"linear-gradient(135deg,#DCFCE7,#BBF7D0)":"linear-gradient(135deg,#FEF2F2,#FEE2E2)", border:`2px solid ${passed?"#22C55E":"#EF4444"}`, borderRadius:16, padding:"1.5rem 2rem", marginBottom:"2rem", display:"flex", alignItems:"center", gap:"1.25rem" }}>
-            <span style={{ fontSize:"2.5rem" }}>{passed?"🎉":"📚"}</span>
-            <div>
-              <h3 style={{ fontWeight:700, color:passed?"#15803D":"#DC2626" }}>{passed?`You passed with ${pct}%!`:`Score: ${pct}% — Keep practising!`}</h3>
-              <p style={{ fontSize:"0.88rem", color:"var(--text-light)" }}>{score}/{Q.length} correct · {passed?"Pass ✓":"70% required"}</p>
-            </div>
+        {/* Header */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 40 }}>
+          <div style={{ fontFamily: "monospace", fontSize: 11, color: ACCENT, textTransform: "uppercase", letterSpacing: 3 }}>
+            // QA Quiz
+          </div>
+          <div style={{ fontFamily: "monospace", fontSize: 12, color: MUTED }}>
+            <span style={{ color: TEXT, fontWeight: 700 }}>{current + 1}</span> / {questions.length}
+          </div>
+        </div>
+
+        {/* Question Card */}
+        <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 16, padding: "40px 36px", marginBottom: 20 }}>
+          <div style={{ fontFamily: "monospace", fontSize: 11, color: MUTED, textTransform: "uppercase", letterSpacing: 2, marginBottom: 20 }}>
+            Question {current + 1}
+          </div>
+          <h2 style={{ fontSize: "clamp(18px, 3vw, 24px)", fontWeight: 700, lineHeight: 1.4, color: TEXT, marginBottom: 0 }}>
+            {questions[current].question}
+          </h2>
+        </div>
+
+        {/* Options */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 32 }}>
+          {questions[current].options.map((option, index) => {
+            let bg = SURFACE;
+            let borderColor = BORDER;
+            let textColor = TEXT;
+            let icon = "";
+
+            if (selected !== null) {
+              if (index === questions[current].answer) {
+                bg = "rgba(0,255,135,0.08)";
+                borderColor = "rgba(0,255,135,0.5)";
+                textColor = GREEN;
+                icon = "✓";
+              } else if (index === selected) {
+                bg = "rgba(255,71,87,0.08)";
+                borderColor = "rgba(255,71,87,0.5)";
+                textColor = RED;
+                icon = "✗";
+              }
+            }
+
+            return (
+              <button key={index} onClick={() => handleAnswer(index)}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  width: "100%", padding: "18px 24px",
+                  background: bg, border: `1px solid ${borderColor}`,
+                  borderRadius: 10, cursor: selected !== null ? "default" : "pointer",
+                  transition: "all 0.2s", textAlign: "left", color: textColor,
+                  fontFamily: "Arial, sans-serif", fontSize: 15,
+                }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                  <span style={{ fontFamily: "monospace", fontSize: 12, color: selected !== null ? borderColor : MUTED, minWidth: 24 }}>
+                    {String.fromCharCode(65 + index)}
+                  </span>
+                  {option}
+                </div>
+                {icon && <span style={{ fontSize: 18, fontWeight: 700, color: textColor }}>{icon}</span>}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Next Button */}
+        {selected !== null && (
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <button onClick={nextQuestion} style={{
+              padding: "14px 32px", background: ACCENT, color: "#000",
+              fontFamily: "monospace", fontSize: 13, fontWeight: 700,
+              border: "none", borderRadius: 8, cursor: "pointer",
+              textTransform: "uppercase", letterSpacing: 1,
+            }}>
+              {current + 1 >= questions.length ? "See Results →" : "Next Question →"}
+            </button>
           </div>
         )}
 
-        {Q.map((q,idx)=>{
-          const ua=answers[q.id]; const isAns=shown[q.id]; const isOk=ua===q.correct
-          const dc=DC[q.diff]; const lc=LC[q.level]||{bg:"var(--beg-bg)",color:"var(--beg)"}
-          return (
-            <div key={q.id} style={{ background:"white", borderRadius:16, border:`1.5px solid ${isAns?(isOk?"#86efac":"#fca5a5"):"var(--border)"}`, boxShadow:"var(--shadow)", padding:"1.75rem", marginBottom:"1.5rem" }}>
-              <div style={{ display:"flex", gap:"0.6rem", marginBottom:"1rem", flexWrap:"wrap" }}>
-                <span style={{ background:lc.bg, color:lc.color, padding:"0.25rem 0.8rem", borderRadius:10, fontSize:"0.75rem", fontWeight:600 }}>{q.unit}</span>
-                <span style={{ background:dc.bg, color:dc.color, padding:"0.25rem 0.8rem", borderRadius:10, fontSize:"0.75rem", fontWeight:600, textTransform:"capitalize" as const }}>{q.diff}</span>
-              </div>
-              <p style={{ fontSize:"1rem", fontWeight:600, lineHeight:1.6, marginBottom:"1.25rem" }}>
-                <span style={{ background:"var(--primary)", color:"white", borderRadius:6, padding:"0.15rem 0.6rem", fontSize:"0.8rem", fontWeight:700, marginRight:"0.5rem" }}>Q{idx+1}</span>{q.text}
-              </p>
-              <div style={{ display:"flex", flexDirection:"column" as const, gap:"0.6rem", marginBottom:"1rem" }}>
-                {q.options.map(opt=>{
-                  const isRight=isAns&&opt.l===q.correct; const isWrong=isAns&&ua===opt.l&&!isOk
-                  return (
-                    <div key={opt.l} onClick={()=>answer(q.id,opt.l)} style={{ display:"flex", alignItems:"center", gap:"0.85rem", padding:"0.85rem 1rem", border:`2px solid ${isRight?"#86efac":isWrong?"#fca5a5":"var(--border)"}`, borderRadius:10, cursor:isAns?"default":"pointer", background:isRight?"var(--correct-bg)":isWrong?"var(--wrong-bg)":"var(--bg)", fontSize:"0.92rem" }}>
-                      <div style={{ width:28, height:28, minWidth:28, borderRadius:7, display:"flex", alignItems:"center", justifyContent:"center", fontWeight:700, fontSize:"0.78rem", background:isRight?"var(--correct)":isWrong?"var(--wrong)":"var(--border)", color:(isRight||isWrong)?"white":"var(--text-light)" }}>{opt.l}</div>
-                      <span style={{ flex:1 }}>{opt.t}</span>
-                      {isRight&&<span>✅</span>}{isWrong&&<span>❌</span>}
-                    </div>
-                  )
-                })}
-              </div>
-              {isAns&&(
-                <div style={{ background:isOk?"var(--correct-bg)":"var(--wrong-bg)", borderLeft:`4px solid ${isOk?"var(--correct)":"var(--wrong)"}`, borderRadius:"0 12px 12px 0", padding:"1rem 1.25rem" }}>
-                  <div style={{ fontWeight:700, color:isOk?"var(--correct)":"var(--wrong)", fontSize:"0.85rem", marginBottom:"0.5rem" }}>{isOk?"✅ Correct!":"❌ Incorrect"} — Explanation</div>
-                  <p style={{ fontSize:"0.9rem", lineHeight:1.7, color:"var(--text)" }}>{q.exp}</p>
-                </div>
-              )}
-            </div>
-          )
-        })}
-
-        <div style={{ display:"flex", gap:"1rem", marginTop:"1rem" }}>
-          {Object.keys(shown).length===Q.length&&!finished&&(
-            <button onClick={()=>setFinished(true)} style={{ background:"var(--primary)", color:"white", padding:"0.8rem 2rem", borderRadius:10, border:"none", fontWeight:700, cursor:"pointer", fontFamily:"inherit" }}>Submit and See Results →</button>
-          )}
-          <Link href="/dashboard/curriculum" style={{ border:"2px solid var(--primary)", color:"var(--primary)", padding:"0.8rem 2rem", borderRadius:10, fontWeight:600, textDecoration:"none", display:"inline-block" }}>← Back to Curriculum</Link>
+        {/* Score tracker */}
+        <div style={{ marginTop: 40, display: "flex", justifyContent: "center", gap: 32 }}>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 20, fontWeight: 800, color: GREEN, fontFamily: "monospace" }}>{score}</div>
+            <div style={{ fontSize: 11, color: MUTED, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: 1 }}>Correct</div>
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 20, fontWeight: 800, color: RED, fontFamily: "monospace" }}>{current - score}</div>
+            <div style={{ fontSize: 11, color: MUTED, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: 1 }}>Wrong</div>
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 20, fontWeight: 800, color: MUTED, fontFamily: "monospace" }}>{questions.length - current - 1}</div>
+            <div style={{ fontSize: 11, color: MUTED, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: 1 }}>Remaining</div>
+          </div>
         </div>
+
       </div>
     </div>
-  )
+  );
 }
