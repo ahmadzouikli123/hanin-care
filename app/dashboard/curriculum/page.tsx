@@ -45,7 +45,7 @@ export default function CurriculumPage() {
         .from("unit_progress")
         .select("unit_id, completed")
         .eq("user_id", uid)
-        .eq("completed", true)
+        .eq("is_completed", true)
 
       // Get unit IDs → unit numbers mapping
       const { data: units } = await supabase
