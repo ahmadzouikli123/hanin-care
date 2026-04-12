@@ -1,4 +1,5 @@
 "use client"
+import { createClient } from "@/lib/supabase/client"
 import { useState } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
@@ -11,6 +12,8 @@ export default function UnitPage() {
   const params   = useParams()
   const unitId   = Number(params.id)
   const unit     = ALL_UNITS.find(u => u.id === unitId)
+  const [userId, setUserId] = useState<string|null>(null)
+  const [unitMarked, setUnitMarked] = useState(false)
   const [tab, setTab] = useState<"theory"|"quiz"|"case">("theory")
   const [answers, setAnswers]   = useState<Record<number,string>>({})
   const [shown, setShown]       = useState<Record<number,boolean>>({})
@@ -22,6 +25,21 @@ export default function UnitPage() {
       <Link href="/dashboard/curriculum">← Back to Curriculum</Link>
     </div>
   )
+
+  useEffect(() => {
+    createClient().auth.getUser().then(({ data }) => {
+      if (data.user) setUserId(data.user.id)
+    })
+  }, [])
+
+  const markUnitComplete = async () => {
+    if (!userId || unitMarked) return
+    const supabase = createClient()
+    const { data: unitRow } = await supabase.from("units").select("id").eq("unit_number", unitId).single()
+    if (!unitRow) return
+    await supabase.from("unit_progress").upsert({ user_id: userId, unit_id: unitRow.id, completed: true, completed_at: new Date().toISOString() }, { onConflict: "user_id,unit_id" })
+    setUnitMarked(true)
+  }
 
   const lc = { beginner:{color:"var(--beg)",bg:"var(--beg-bg)",border:"#A8D9E8"}, intermediate:{color:"var(--int)",bg:"var(--int-bg)",border:"#FCD34D"}, advanced:{color:"var(--adv)",bg:"var(--adv-bg)",border:"#C4B5FD"} }[unit.level]
   const DC: Record<string,any> = { easy:{bg:"#DCFCE7",color:"#166534"}, medium:{bg:"#FEF3C7",color:"#92400E"}, hard:{bg:"#FEE2E2",color:"#991B1B"} }
