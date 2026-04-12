@@ -3,11 +3,14 @@ import { useState } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { UNITS } from "@/lib/curriculum-data"
+import { UNITS_4_27 } from "@/lib/units-4-27"
+
+const ALL_UNITS = [...UNITS, ...UNITS_4_27]
 
 export default function UnitPage() {
   const params   = useParams()
   const unitId   = Number(params.id)
-  const unit     = UNITS.find(u => u.id === unitId)
+  const unit     = ALL_UNITS.find(u => u.id === unitId)
   const [tab, setTab] = useState<"theory"|"quiz"|"case">("theory")
   const [answers, setAnswers]   = useState<Record<number,string>>({})
   const [shown, setShown]       = useState<Record<number,boolean>>({})

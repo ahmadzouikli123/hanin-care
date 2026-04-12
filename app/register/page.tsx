@@ -1,225 +1,185 @@
 "use client"
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
-
-const PROVINCES = ["Ontario","British Columbia","Alberta","Quebec","Manitoba","Saskatchewan","Nova Scotia","New Brunswick","Newfoundland and Labrador","Prince Edward Island","Northwest Territories","Nunavut","Yukon"]
 
 const PLANS = [
   {
     id: "beginner",
     icon: "🌱",
     label: "Beginner",
-    color: "var(--beg)",
-    bg: "var(--beg-bg)",
-    border: "#A8D9E8",
-    desc: "Level 1 only",
+    color: "#2E7D9E",
+    bg: "#E0F2F7",
+    border: "#2E7D9E",
     units: "8 units · 140 hrs",
-    features: ["Canadian Healthcare System", "Ethics & Legal Frameworks", "Infection Control", "Basic Personal Care"]
+    levels: ["Level 1 — Foundations"],
+    desc: "Start your PSW journey with core skills and Canadian healthcare basics.",
   },
   {
     id: "standard",
     icon: "📈",
     label: "Standard",
-    color: "var(--int)",
-    bg: "var(--int-bg)",
-    border: "#FCD34D",
-    desc: "Level 1 + Level 2",
+    color: "#D97706",
+    bg: "#FEF3C7",
+    border: "#D97706",
     units: "18 units · 360 hrs",
-    features: ["All Beginner content", "Clinical Observations", "Chronic Disease Care", "Palliative & End-of-Life Care"]
+    levels: ["Level 1 — Foundations", "Level 2 — Clinical Skills"],
+    desc: "Expand into clinical observations, chronic disease, and mental health care.",
   },
   {
     id: "advanced",
     icon: "🏆",
     label: "Advanced",
-    color: "var(--adv)",
-    bg: "var(--adv-bg)",
-    border: "#C4B5FD",
-    desc: "All 3 levels",
+    color: "#7C3AED",
+    bg: "#EDE9FE",
+    border: "#7C3AED",
     units: "27 units · 600 hrs",
-    features: ["All Standard content", "Complex Medical Conditions", "Indigenous Cultural Safety", "Capstone Practicum"]
-  }
+    levels: ["Level 1 — Foundations", "Level 2 — Clinical Skills", "Level 3 — Advanced Practice"],
+    desc: "Full curriculum including delegated acts, gerontology, and capstone practicum.",
+    popular: true,
+  },
 ]
 
 export default function RegisterPage() {
-  const [step, setStep]           = useState<1|2>(1)
-  const [plan, setPlan]           = useState<string>("")
-  const [form, setForm]           = useState({ firstName:"", lastName:"", email:"", password:"", province:"", employer:"" })
-  const [error, setError]         = useState("")
-  const [loading, setLoading]     = useState(false)
-  const [gLoading, setGLoading]   = useState(false)
-  const [done, setDone]           = useState(false)
-
-  const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
-    setForm(f => ({ ...f, [k]: e.target.value }))
-
-  const handleGoogle = async () => {
-    if (!plan) return
-    setGLoading(true)
-    const supabase = createClient()
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/dashboard`,
-        queryParams: { prompt: "select_account" }
-      }
-    })
-  }
+  const router = useRouter()
+  const [step, setStep]         = useState<1 | 2>(1)
+  const [plan, setPlan]         = useState("")
+  const [firstName, setFirst]   = useState("")
+  const [lastName, setLast]     = useState("")
+  const [email, setEmail]       = useState("")
+  const [password, setPassword] = useState("")
+  const [error, setError]       = useState("")
+  const [loading, setLoading]   = useState(false)
 
   const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault(); setLoading(true); setError("")
+    e.preventDefault()
+    setLoading(true); setError("")
     const supabase = createClient()
-    const { error: err } = await supabase.auth.signUp({
-      email: form.email,
-      password: form.password,
+    const { error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
       options: {
-        data: {
-          first_name: form.firstName,
-          last_name: form.lastName,
-          province: form.province,
-          employer: form.employer,
-          plan: plan
-        }
-      }
+        data: { first_name: firstName, last_name: lastName, plan },
+      },
     })
-    if (err) { setError(err.message); setLoading(false) }
-    else setDone(true)
+    if (signUpError) { setError(signUpError.message); setLoading(false); return }
+
+    // Update plan in profiles table
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      await supabase.from("profiles").update({ plan, first_name: firstName, last_name: lastName }).eq("id", user.id)
+    }
+    router.push("/dashboard")
   }
 
-  const inp: React.CSSProperties = { width:"100%", padding:"0.8rem 1rem", border:"1.5px solid var(--border)", borderRadius:10, fontSize:"0.9rem", fontFamily:"inherit", background:"var(--bg)", color:"var(--text)", outline:"none" }
-  const lbl: React.CSSProperties = { display:"block", fontSize:"0.82rem", fontWeight:600, color:"var(--text)", marginBottom:"0.4rem" }
-
-  if (done) return (
-    <div style={{ minHeight:"100vh", background:"var(--bg)", display:"flex", alignItems:"center", justifyContent:"center" }}>
-      <div style={{ background:"white", borderRadius:20, padding:"3rem", maxWidth:420, textAlign:"center", boxShadow:"var(--shadow)" }}>
-        <div style={{ fontSize:"3rem", marginBottom:"1rem" }}>✅</div>
-        <h2 style={{ fontFamily:"\"Playfair Display\",serif", fontSize:"1.8rem", marginBottom:"0.75rem" }}>Check your email</h2>
-        <p style={{ color:"var(--text-light)", marginBottom:"2rem", lineHeight:1.7 }}>
-          We sent a confirmation link to <strong>{form.email}</strong>.<br />
-          Your plan: <strong>{PLANS.find(p=>p.id===plan)?.label}</strong>
-        </p>
-        <Link href="/login" style={{ background:"var(--primary)", color:"white", padding:"0.85rem 2rem", borderRadius:10, textDecoration:"none", fontWeight:600 }}>Go to Login</Link>
-      </div>
-    </div>
-  )
+  const inp: React.CSSProperties = { width: "100%", padding: "0.85rem 1rem", border: "1.5px solid #D4E0ED", borderRadius: 10, fontSize: "0.95rem", fontFamily: "inherit", background: "#F5F7FA", color: "#1A2332", outline: "none", boxSizing: "border-box" }
+  const lbl: React.CSSProperties = { display: "block", fontSize: "0.85rem", fontWeight: 600, color: "#1A2332", marginBottom: "0.5rem" }
 
   return (
-    <div style={{ minHeight:"100vh", background:"var(--bg)", display:"flex", alignItems:"center", justifyContent:"center", padding:"2rem" }}>
-      <div style={{ background:"white", borderRadius:20, padding:"2.5rem", width:"100%", maxWidth: step===1 ? 860 : 540, boxShadow:"var(--shadow)", transition:"max-width 0.3s" }}>
+    <div style={{ minHeight: "100vh", display: "flex" }}>
 
-        {/* Header */}
-        <div style={{ textAlign:"center", marginBottom:"1.75rem" }}>
-          <img src="/logo.png" alt="Hanin Care" style={{ width:55, height:55, objectFit:"contain", marginBottom:"0.6rem" }} />
-          <h2 style={{ fontFamily:"\"Playfair Display\",serif", fontSize:"1.7rem", marginBottom:"0.3rem" }}>
-            {step===1 ? "Choose Your Training Plan" : "Create Your Account"}
-          </h2>
-          <p style={{ color:"var(--text-light)", fontSize:"0.88rem" }}>
-            {step===1 ? "Select the level that matches your training goals" : `Plan: ${PLANS.find(p=>p.id===plan)?.icon} ${PLANS.find(p=>p.id===plan)?.label}`}
-          </p>
-        </div>
-
-        {/* STEP 1 — Plan Selection */}
-        {step === 1 && (
-          <div>
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(230px,1fr))", gap:"1rem", marginBottom:"1.5rem" }}>
-              {PLANS.map(p => (
-                <div
-                  key={p.id}
-                  onClick={() => setPlan(p.id)}
-                  style={{
-                    border: `2px solid ${plan===p.id ? p.color : "var(--border)"}`,
-                    borderRadius:16,
-                    padding:"1.5rem",
-                    cursor:"pointer",
-                    background: plan===p.id ? p.bg : "white",
-                    transition:"all 0.2s",
-                    position:"relative"
-                  }}
-                >
-                  {plan===p.id && (
-                    <div style={{ position:"absolute", top:12, right:12, width:22, height:22, borderRadius:"50%", background:p.color, color:"white", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"0.75rem", fontWeight:700 }}>✓</div>
-                  )}
-                  <div style={{ fontSize:"2rem", marginBottom:"0.75rem" }}>{p.icon}</div>
-                  <div style={{ display:"inline-block", background:p.color, color:"white", borderRadius:20, padding:"0.2rem 0.75rem", fontSize:"0.75rem", fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:"0.5rem" }}>{p.label}</div>
-                  <div style={{ fontSize:"0.82rem", color:p.color, fontWeight:600, marginBottom:"0.5rem" }}>{p.desc}</div>
-                  <div style={{ fontSize:"0.78rem", color:"var(--text-light)", marginBottom:"1rem" }}>{p.units}</div>
-                  <ul style={{ listStyle:"none", display:"flex", flexDirection:"column", gap:"0.4rem" }}>
-                    {p.features.map((f,i) => (
-                      <li key={i} style={{ fontSize:"0.8rem", color:"var(--text)", display:"flex", alignItems:"center", gap:"0.4rem" }}>
-                        <span style={{ color:p.color, fontWeight:700 }}>✓</span> {f}
-                      </li>
-                    ))}
-                  </ul>
+      {/* LEFT */}
+      <div style={{ flex: 1, background: "linear-gradient(135deg,#0A3D5C,#0F5A8A)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "white", padding: "3rem" }}>
+        <div style={{ textAlign: "center", maxWidth: 420 }}>
+          <img src="/logo.png" alt="Hanin" style={{ width: 110, height: 110, objectFit: "contain", marginBottom: "1.5rem" }} />
+          <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: "2rem", marginBottom: "0.5rem" }}>
+            Hanin <span style={{ color: "#7FFFC0" }}>Care</span>
+          </h1>
+          <p style={{ opacity: 0.85, marginBottom: "2rem", lineHeight: 1.7 }}>Training Platform for Elderly and Dementia Care</p>
+          <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: 14, padding: "1.5rem", textAlign: "left" }}>
+            <p style={{ fontWeight: 700, marginBottom: "1rem", fontSize: "0.95rem" }}>Choose your path:</p>
+            {PLANS.map(p => (
+              <div key={p.id} style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
+                <span style={{ fontSize: "1.3rem" }}>{p.icon}</span>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: "0.9rem" }}>{p.label}</div>
+                  <div style={{ opacity: 0.7, fontSize: "0.78rem" }}>{p.units}</div>
                 </div>
-              ))}
-            </div>
-
-            <button
-              onClick={() => { if (plan) setStep(2) }}
-              disabled={!plan}
-              style={{ width:"100%", padding:"0.9rem", background: plan ? "var(--primary)" : "var(--border)", color: plan ? "white" : "var(--text-light)", borderRadius:10, border:"none", fontWeight:700, fontSize:"1rem", cursor: plan ? "pointer" : "not-allowed", fontFamily:"inherit" }}
-            >
-              {plan ? `Continue with ${PLANS.find(p=>p.id===plan)?.label} Plan →` : "Select a plan to continue"}
-            </button>
-
-            <p style={{ textAlign:"center", marginTop:"1.25rem", color:"var(--text-light)", fontSize:"0.88rem" }}>
-              Already have an account? <Link href="/login" style={{ color:"var(--primary)", fontWeight:600, textDecoration:"none" }}>Sign in</Link>
-            </p>
+              </div>
+            ))}
           </div>
-        )}
+        </div>
+      </div>
 
-        {/* STEP 2 — Account Details */}
-        {step === 2 && (
-          <div>
-            {/* Google */}
-            <button
-              onClick={handleGoogle}
-              disabled={gLoading}
-              style={{ width:"100%", padding:"0.85rem", border:"2px solid var(--border)", borderRadius:10, background:"white", display:"flex", alignItems:"center", justifyContent:"center", gap:"0.75rem", cursor:gLoading?"wait":"pointer", fontFamily:"inherit", fontSize:"0.95rem", fontWeight:600, color:"var(--text)", marginBottom:"1.25rem" }}
-            >
-              <svg width="20" height="20" viewBox="0 0 48 48">
-                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-              </svg>
-              {gLoading ? "Redirecting…" : "Continue with Google"}
-            </button>
+      {/* RIGHT */}
+      <div style={{ width: 520, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2.5rem", background: "white", overflowY: "auto" }}>
+        <div style={{ width: "100%", maxWidth: 440 }}>
 
-            <div style={{ display:"flex", alignItems:"center", gap:"1rem", marginBottom:"1.25rem" }}>
-              <div style={{ flex:1, height:1, background:"var(--border)" }} />
-              <span style={{ fontSize:"0.8rem", color:"var(--text-light)" }}>or register with email</span>
-              <div style={{ flex:1, height:1, background:"var(--border)" }} />
-            </div>
-
-            {error && <div style={{ background:"#FEF2F2", border:"1px solid #FCA5A5", borderRadius:10, padding:"0.85rem", marginBottom:"1rem", color:"#DC2626", fontSize:"0.88rem" }}>⚠️ {error}</div>}
-
-            <form onSubmit={handleRegister} style={{ display:"flex", flexDirection:"column", gap:"0.9rem" }}>
-              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"0.9rem" }}>
-                <div><label style={lbl}>First Name</label><input required value={form.firstName} onChange={set("firstName")} placeholder="Sarah" style={inp} /></div>
-                <div><label style={lbl}>Last Name</label><input required value={form.lastName} onChange={set("lastName")} placeholder="Johnson" style={inp} /></div>
+          {/* STEP INDICATOR */}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "2rem" }}>
+            {[1, 2].map(s => (
+              <div key={s} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: step >= s ? "#0F5A8A" : "#E5E7EB", color: step >= s ? "white" : "#9CA3AF", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "0.8rem" }}>{s}</div>
+                <span style={{ fontSize: "0.82rem", color: step >= s ? "#0F5A8A" : "#9CA3AF", fontWeight: step >= s ? 600 : 400 }}>{s === 1 ? "Choose Plan" : "Your Details"}</span>
+                {s < 2 && <div style={{ width: 32, height: 2, background: step > s ? "#0F5A8A" : "#E5E7EB", borderRadius: 2 }} />}
               </div>
-              <div><label style={lbl}>Email</label><input type="email" required value={form.email} onChange={set("email")} placeholder="you@example.com" style={inp} /></div>
-              <div><label style={lbl}>Password</label><input type="password" required value={form.password} onChange={set("password")} placeholder="Min. 8 characters" style={inp} /></div>
-              <div>
-                <label style={lbl}>Province</label>
-                <select required value={form.province} onChange={set("province")} style={{ ...inp }}>
-                  <option value="">Select province…</option>
-                  {PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
-                </select>
+            ))}
+          </div>
+
+          {/* STEP 1 — PLAN SELECTION */}
+          {step === 1 && (
+            <>
+              <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: "1.7rem", marginBottom: "0.4rem" }}>Choose your plan</h2>
+              <p style={{ color: "#4A5F7F", marginBottom: "1.5rem", fontSize: "0.9rem" }}>You can upgrade anytime from your dashboard.</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem", marginBottom: "1.5rem" }}>
+                {PLANS.map(p => (
+                  <div key={p.id} onClick={() => setPlan(p.id)}
+                    style={{ border: `2px solid ${plan === p.id ? p.border : "#E5E7EB"}`, borderRadius: 14, padding: "1.1rem 1.25rem", cursor: "pointer", background: plan === p.id ? p.bg : "white", position: "relative", transition: "all 0.2s" }}>
+                    {p.popular && <div style={{ position: "absolute", top: -10, right: 12, background: "#7C3AED", color: "white", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: 20 }}>MOST POPULAR</div>}
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.4rem" }}>
+                      <span style={{ fontSize: "1.4rem" }}>{p.icon}</span>
+                      <div>
+                        <span style={{ fontWeight: 700, color: p.color, fontSize: "1rem" }}>{p.label}</span>
+                        <span style={{ marginLeft: "0.5rem", fontSize: "0.78rem", color: "#6B7280" }}>{p.units}</span>
+                      </div>
+                      {plan === p.id && <span style={{ marginLeft: "auto", color: p.color, fontSize: "1.2rem" }}>✓</span>}
+                    </div>
+                    <p style={{ fontSize: "0.82rem", color: "#4A5F7F", margin: 0, lineHeight: 1.5 }}>{p.desc}</p>
+                    <div style={{ marginTop: "0.5rem", display: "flex", flexDirection: "column", gap: "0.2rem" }}>
+                      {p.levels.map(l => (
+                        <div key={l} style={{ fontSize: "0.75rem", color: p.color, fontWeight: 600 }}>✓ {l}</div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div><label style={lbl}>Employer / Facility (optional)</label><input value={form.employer} onChange={set("employer")} placeholder="e.g. Sunrise Long-Term Care" style={inp} /></div>
-              <button type="submit" disabled={loading} style={{ background:"var(--primary)", color:"white", padding:"0.9rem", borderRadius:10, border:"none", fontWeight:700, fontSize:"1rem", cursor:loading?"wait":"pointer", opacity:loading?0.7:1, fontFamily:"inherit" }}>
-                {loading ? "Creating account…" : "Create Account →"}
+              <button onClick={() => plan && setStep(2)} disabled={!plan}
+                style={{ width: "100%", background: plan ? "#0F5A8A" : "#E5E7EB", color: plan ? "white" : "#9CA3AF", padding: "0.9rem", borderRadius: 10, border: "none", fontWeight: 700, fontSize: "1rem", cursor: plan ? "pointer" : "not-allowed", fontFamily: "inherit" }}>
+                Continue →
               </button>
-            </form>
+            </>
+          )}
 
-            <div style={{ display:"flex", justifyContent:"space-between", marginTop:"1.25rem" }}>
-              <button onClick={() => setStep(1)} style={{ background:"none", border:"none", color:"var(--text-light)", cursor:"pointer", fontSize:"0.88rem", fontFamily:"inherit" }}>← Change plan</button>
-              <Link href="/login" style={{ color:"var(--primary)", fontWeight:600, textDecoration:"none", fontSize:"0.88rem" }}>Already have account?</Link>
-            </div>
-          </div>
-        )}
+          {/* STEP 2 — DETAILS */}
+          {step === 2 && (
+            <>
+              <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: "1.7rem", marginBottom: "0.4rem" }}>Create your account</h2>
+              <p style={{ color: "#4A5F7F", marginBottom: "1.5rem", fontSize: "0.9rem" }}>
+                Plan: <strong style={{ color: PLANS.find(p => p.id === plan)?.color }}>{PLANS.find(p => p.id === plan)?.icon} {PLANS.find(p => p.id === plan)?.label}</strong>
+                <button onClick={() => setStep(1)} style={{ marginLeft: "0.75rem", background: "none", border: "none", color: "#0F5A8A", cursor: "pointer", fontSize: "0.82rem", fontWeight: 600, padding: 0 }}>Change</button>
+              </p>
+              {error && <div style={{ background: "#FEF2F2", border: "1px solid #FCA5A5", borderRadius: 10, padding: "0.85rem 1rem", marginBottom: "1.25rem", color: "#DC2626", fontSize: "0.9rem" }}>{error}</div>}
+              <form onSubmit={handleRegister} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+                  <div><label style={lbl}>First name</label><input required value={firstName} onChange={e => setFirst(e.target.value)} placeholder="Sara" style={inp} /></div>
+                  <div><label style={lbl}>Last name</label><input required value={lastName} onChange={e => setLast(e.target.value)} placeholder="Ahmed" style={inp} /></div>
+                </div>
+                <div><label style={lbl}>Email address</label><input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" style={inp} /></div>
+                <div><label style={lbl}>Password</label><input type="password" required minLength={8} value={password} onChange={e => setPassword(e.target.value)} placeholder="Min. 8 characters" style={inp} /></div>
+                <button type="submit" disabled={loading}
+                  style={{ background: "#0F5A8A", color: "white", padding: "0.9rem", borderRadius: 10, border: "none", fontWeight: 700, fontSize: "1rem", cursor: loading ? "wait" : "pointer", opacity: loading ? 0.7 : 1, fontFamily: "inherit", marginTop: "0.25rem" }}>
+                  {loading ? "Creating account..." : "Create Account →"}
+                </button>
+              </form>
+            </>
+          )}
+
+          <p style={{ textAlign: "center", marginTop: "1.5rem", color: "#4A5F7F", fontSize: "0.9rem" }}>
+            Already have an account? <Link href="/login" style={{ color: "#0F5A8A", fontWeight: 600, textDecoration: "none" }}>Sign in</Link>
+          </p>
+
+        </div>
       </div>
     </div>
   )
