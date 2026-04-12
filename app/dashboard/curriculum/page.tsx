@@ -30,7 +30,7 @@ export default function CurriculumPage() {
           .select("plan")
           .eq("id", data.user.id)
           .single()
-        if (profile?.plan) setPlan(profile.plan)
+        if ((profile as any)?.plan) setPlan((profile as any).plan)
         // fallback to metadata
         else if (data.user.user_metadata?.plan) setPlan(data.user.user_metadata.plan)
       }
