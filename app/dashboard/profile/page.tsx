@@ -69,7 +69,7 @@ export default function ProfilePage() {
     setSaving(true)
     setError("")
     const { data: authData } = await supabase.auth.getUser()
-    console.log("user:", authData.user?.id); if (!authData.user) { setSaving(false); return }
+    if (!authData.user) { setSaving(false); return }
 
     const { error: err } = await supabase
       .from("profiles")
@@ -82,7 +82,7 @@ export default function ProfilePage() {
       })
       .eq("id", authData.user.id)
 
-    console.error("Profile update error:", err); if (err) {
+    if (err) {
       setError("Failed to save. Please try again.")
     } else {
       setProfile({ ...form })
