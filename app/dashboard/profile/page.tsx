@@ -69,7 +69,7 @@ export default function ProfilePage() {
     setSaving(true)
     setError("")
     const { data: authData } = await supabase.auth.getUser()
-    if (!authData.user) { setSaving(false); return }
+    console.log("user:", authData.user?.id); if (!authData.user) { setSaving(false); return }
 
     const { error: err } = await supabase
       .from("profiles")
