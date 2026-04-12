@@ -78,7 +78,6 @@ export default function ProfilePage() {
         last_name:  form.last_name,
         phone:      form.phone,
         employer:   form.employer,
-        full_name:  `${form.first_name} ${form.last_name}`.trim(),
         updated_at: new Date().toISOString(),
       })
       .eq("id", authData.user.id)
