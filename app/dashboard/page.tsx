@@ -124,7 +124,7 @@ export default function DashboardPage() {
           {[
             { href:"/dashboard/curriculum", icon:"📚", label:"View Curriculum",  color:"var(--primary)", bg:"var(--beg-bg)" },
             { href:"/dashboard/quiz/1",     icon:"🧠", label:"Take a Quiz",      color:"var(--adv)",    bg:"var(--adv-bg)" },
-            { href:"/dashboard",            icon:"📜", label:"My Certificates",  color:"var(--int)",    bg:"var(--int-bg)" },
+            { href:"/dashboard/certificates", icon:"📜", label:"My Certificates",  color:"var(--int)",    bg:"var(--int-bg)" },
           ].map(({ href, icon, label, color, bg }) => (
             <Link key={label} href={href} style={{ background:"white", border:"1px solid var(--border)", borderRadius:14, padding:"1.5rem", display:"flex", alignItems:"center", gap:"1rem", textDecoration:"none", boxShadow:"var(--shadow)" }}>
               <div style={{ width:44, height:44, borderRadius:12, background:bg, display:"flex", alignItems:"center", justifyContent:"center", fontSize:"1.3rem" }}>{icon}</div>
