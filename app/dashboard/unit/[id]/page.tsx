@@ -37,7 +37,7 @@ export default function UnitPage() {
     const supabase = createClient()
     const { data: unitRow } = await supabase.from("units").select("id").eq("unit_number", unitId).single()
     if (!unitRow) return
-    await supabase.from("unit_progress").upsert({ user_id: userId, unit_id: unitRow.id, is_completed: true, completed_at: new Date().toISOString() }, { onConflict: "user_id,unit_id" })
+    await supabase.from("unit_progress").upsert({ user_id: userId, unit_id: unitRow.id, is_completed: true, completed_at: new Date().toISOString(), completed_at: new Date().toISOString() }, { onConflict: "user_id,unit_id" })
     setUnitMarked(true)
   }
 
