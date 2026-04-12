@@ -57,7 +57,7 @@ export default function CurriculumPage() {
         const done = new Set<number>(
           progress.map((p: any) => unitMap[p.unit_id]).filter(Boolean)
         )
-        console.log("progress:", progress, "units:", units, "done:", done); setCompleted(done)
+        setCompleted(done)
       }
     }
     setLoading(false)
