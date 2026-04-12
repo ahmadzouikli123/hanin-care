@@ -84,7 +84,7 @@ export default function ProfilePage() {
       })
       .eq("id", authData.user.id)
 
-    if (err) {
+    console.error("Profile update error:", err); if (err) {
       setError("Failed to save. Please try again.")
     } else {
       setProfile({ ...form })
