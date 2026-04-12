@@ -43,7 +43,7 @@ export default function CurriculumPage() {
       // Get completed units
       const { data: progress } = await supabase
         .from("unit_progress")
-        .select("unit_id, completed")
+        .select("unit_id, is_completed")
         .eq("user_id", uid)
         .eq("is_completed", true)
 
