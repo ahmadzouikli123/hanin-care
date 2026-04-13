@@ -133,19 +133,20 @@ export default function CertificatesPage() {
       const W = 297
       const H = 210
 // Add logo
+let logoB64: string | null = null
 try {
   const logoResp = await fetch("/logo.png")
   const logoBlob = await logoResp.blob()
-  const logoB64 = await new Promise<string>((res) => {
+  logoB64 = await new Promise<string>((res) => {
     const reader = new FileReader()
     reader.onloadend = () => res((reader.result as string).split(",")[1])
     reader.readAsDataURL(logoBlob)
   })
-  doc.addImage(logoB64, "PNG", W/2 - 15, 12, 30, 30)
 } catch(e) {}
-      // Background
-      doc.setFillColor(245, 247, 250)
-      doc.rect(0, 0, W, H, "F")
+
+// Background
+doc.setFillColor(245, 247, 250)
+doc.rect(0, 0, W, H, "F")
 
       // Top border strip
       const [r, g, b] = hexToRgb(cert.color)
@@ -174,6 +175,7 @@ try {
       doc.setFontSize(11)
       doc.setTextColor(r, g, b)
       doc.setFont("helvetica", "bold")
+      if (logoB64) doc.addImage(logoB64, "PNG", W/2 - 15, 10, 30, 18)
       doc.text("HANIN CARE CANADA", W / 2, 30, { align: "center" })
 
       doc.setFontSize(8)
