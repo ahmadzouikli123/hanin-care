@@ -76,7 +76,7 @@ export default function CertificatesPage() {
     // Get unit progress
     const { data: progress } = await supabase
       .from("unit_progress")
-      .select("unit_id, completed")
+      .select("unit_id, is_completed")
       .eq("user_id", uid)
 
     // Get existing certificates
@@ -95,7 +95,7 @@ export default function CertificatesPage() {
 
     const statuses: CertStatus[] = LEVELS.filter(l => allowedLevels.includes(l.slug)).map(level => {
       const levelUnits = (units || []).filter((u: any) => u.level_id === level.id)
-      const completedInLevel = levelUnits.filter((u: any) => completedUnitIds.has(u.unit_id)).length
+      const completedInLevel = levelUnits.filter((u: any) => completedUnitIds.has(u.id)).length
       const allUnitsComplete = completedInLevel >= level.units
       const quizPassed = !!bestAttempt
       const earned = allUnitsComplete && quizPassed
