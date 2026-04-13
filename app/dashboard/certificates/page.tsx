@@ -175,7 +175,15 @@ doc.rect(0, 0, W, H, "F")
       doc.setFontSize(11)
       doc.setTextColor(r, g, b)
       doc.setFont("helvetica", "bold")
-      if (logoB64) doc.addImage(logoB64, "PNG", W/2 - 15, 10, 30, 18)
+    // Watermark logo (center, large, transparent)
+if (logoB64) {
+  doc.saveGraphicsState()
+  doc.setGState(new (doc as any).GState({ opacity: 0.08 }))
+  doc.addImage(logoB64, "PNG", W/2 - 40, H/2 - 40, 80, 80)
+  doc.restoreGraphicsState()
+  // Small logo top center
+  doc.addImage(logoB64, "PNG", W/2 - 15, 10, 30, 18)
+}
       doc.text("HANIN CARE CANADA", W / 2, 30, { align: "center" })
 
       doc.setFontSize(8)
