@@ -233,7 +233,7 @@ export default function UnitPage() {
             })}
             <div style={{ display: "flex", gap: "1rem", marginTop: "1rem", flexWrap: "wrap" }}>
               {Object.keys(shown).length===unit.quiz.length && !finished && (
-                <button onClick={() => setFinished(true)} style={{ background: "var(--primary)", color: "white", padding: "0.8rem 2rem", borderRadius: 10, border: "none", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Submit & See Results →</button>
+                <button onClick={async () => { setFinished(true); const sc = unit.quiz.filter((q,i) => answers[i] === q.correct).length; if (Math.round((sc/unit.quiz.length)*100) >= 70) await markUnitComplete() }} style={{ background: "var(--primary)", color: "white", padding: "0.8rem 2rem", borderRadius: 10, border: "none", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Submit & See Results →</button>
               )}
               <button onClick={() => { setAnswers({}); setShown({}); setFinished(false) }} style={{ background: "transparent", border: "2px solid var(--border)", color: "var(--text-light)", padding: "0.8rem 1.5rem", borderRadius: 10, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>🔄 Reset</button>
               <Link href="/dashboard/curriculum" style={{ border: "2px solid var(--primary)", color: "var(--primary)", padding: "0.8rem 2rem", borderRadius: 10, fontWeight: 600, textDecoration: "none", display: "inline-block" }}>← Curriculum</Link>
