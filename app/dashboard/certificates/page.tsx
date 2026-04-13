@@ -91,7 +91,7 @@ export default function CertificatesPage() {
       .select("id, level_id")
 
     const allowedLevels = PLAN_LEVELS[userPlan] || ["beginner"]
-    const completedUnitIds = new Set((progress || []).filter((p: any) => p.completed).map((p: any) => p.unit_id))
+    const completedUnitIds = new Set((progress || []).filter((p: any) => p.is_completed).map((p: any) => p.unit_id))
 
     const statuses: CertStatus[] = LEVELS.filter(l => allowedLevels.includes(l.slug)).map(level => {
       const levelUnits = (units || []).filter((u: any) => u.level_id === level.id)
