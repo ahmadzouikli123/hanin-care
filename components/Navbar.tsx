@@ -17,6 +17,7 @@ export default function Navbar() {
     { href: "/dashboard",            label: "Dashboard"  },
     { href: "/dashboard/curriculum", label: "Curriculum" },
     { href: "/dashboard/quiz/1",     label: "Quizzes"    },
+    { href: "/dashboard/profile",    label: "Profile"    },
   ]
 
   return (
