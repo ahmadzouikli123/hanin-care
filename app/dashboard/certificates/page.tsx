@@ -132,7 +132,17 @@ export default function CertificatesPage() {
 
       const W = 297
       const H = 210
-
+// Add logo
+try {
+  const logoResp = await fetch("/logo.png")
+  const logoBlob = await logoResp.blob()
+  const logoB64 = await new Promise<string>((res) => {
+    const reader = new FileReader()
+    reader.onloadend = () => res((reader.result as string).split(",")[1])
+    reader.readAsDataURL(logoBlob)
+  })
+  doc.addImage(logoB64, "PNG", W/2 - 15, 12, 30, 30)
+} catch(e) {}
       // Background
       doc.setFillColor(245, 247, 250)
       doc.rect(0, 0, W, H, "F")
@@ -223,7 +233,7 @@ export default function CertificatesPage() {
       const stats = [
         { label: "Units Completed", value: `${cert.totalUnits}/${cert.totalUnits}` },
         { label: "Practice Quiz Score", value: `${cert.quizScore || 0}%` },
-        { label: "Status", value: "PASSED ✓" },
+        { label: "Status", value: "PASSED" },
       ]
       stats.forEach((s, i) => {
         const x = 70 + i * 55
@@ -272,7 +282,7 @@ export default function CertificatesPage() {
         doc.roundedRect(bx - 25, 188, 50, 10, 2, 2, "F")
         doc.setFontSize(7)
         doc.setTextColor(80, 80, 80)
-        doc.text(`✓ ${badge}`, bx, 194, { align: "center" })
+        doc.text(`v ${badge}`, bx, 194, { align: "center" })
       })
 
       // Save the PDF
