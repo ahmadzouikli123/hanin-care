@@ -1,5 +1,5 @@
+﻿@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap');
-
 :root {
   --primary:       #0F5A8A;
   --primary-light: #1E7BA8;
@@ -24,7 +24,6 @@
   --wrong:         #dc2626;
   --wrong-bg:      #fef2f2;
 }
-
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }

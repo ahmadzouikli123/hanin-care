@@ -1,23 +1,26 @@
 ﻿import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
 
-export const metadata = { title: 'Admin — Hanin Care' }
-
-export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function DebugPage() {
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
   )
+
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-  const { data: profile } = await supabase
+  const { data: profile } = user ? await supabase
     .from('profiles')
-    .select('is_admin')
+    .select('*')
     .eq('id', user.id)
-    .single()
-  if (!profile?.is_admin) redirect('/dashboard')
-  return <>{children}</>
+    .single() : { data: null }
+
+  return (
+    <pre style={{padding:20}}>
+      USER: {JSON.stringify(user?.email, null, 2)}
+      {'\n\n'}
+      PROFILE: {JSON.stringify(profile, null, 2)}
+    </pre>
+  )
 }
