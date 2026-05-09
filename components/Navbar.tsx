@@ -15,7 +15,7 @@ export default function Navbar() {
       if (data.user) {
         const { data: profile } = await supabase
           .from("profiles").select("is_admin").eq("id", data.user.id).single()
-        if ((profile as any)?.is_admin) setIsAdmin(true)
+        console.log("profile:", profile); if ((profile as any)?.is_admin) setIsAdmin(true)
       }
     })
   }, [])
