@@ -15,7 +15,7 @@ export default function Navbar() {
       if (data.user) {
         const { data: profile } = await supabase
           .from("profiles").select("is_admin").eq("id", data.user.id).single()
-        console.log("profile:", profile); if ((profile as any)?.is_admin) setIsAdmin(true)
+        if ((profile as any)?.is_admin) setIsAdmin(true)
       }
     })
   }, [])
@@ -31,6 +31,7 @@ export default function Navbar() {
     { href: "/dashboard/curriculum", label: "Curriculum" },
     { href: "/dashboard/quiz/1",     label: "Quizzes"    },
     { href: "/dashboard/profile",    label: "Profile"    },
+    { href: "/admin",                label: "🛡️ Admin"   },
   ]
 
   return (
@@ -56,7 +57,7 @@ export default function Navbar() {
           {isAdmin && (
             <li>
               <Link href="/admin" style={{ textDecoration:"none", color:"white", fontWeight:600, fontSize:"0.85rem", padding:"0.5rem 1rem", borderRadius:8, background:"#0F5A8A", display:"block" }}>
-                🛡️ Admin
+                Admin
               </Link>
             </li>
           )}
