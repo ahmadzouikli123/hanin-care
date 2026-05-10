@@ -37,9 +37,9 @@ export default function Navbar() {
     <nav style={{ background:"#fff", boxShadow:"0 2px 20px rgba(15,90,138,0.08)", position:"fixed", top:0, width:"100%", zIndex:1000, padding:"0.7rem 2rem", borderBottom:"3px solid var(--primary)" }}>
       <div style={{ maxWidth:1400, margin:"0 auto", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
         <Link href="/dashboard" style={{ display:"flex", alignItems:"center", gap:"0.75rem", textDecoration:"none" }}>
-          <img src="/logo.png" alt="Hanin Care" style={{ width:44, height:44, objectFit:"contain" }} />
+          <img src="/logo.png" alt="Elder Support Training PSW" style={{ width:44, height:44, objectFit:"contain" }} />
           <div>
-            <span style={{ fontFamily:"\"Playfair Display\",serif", fontSize:"1.4rem", fontWeight:800, color:"var(--primary)" }}>Hanin Care</span>
+            <span style={{ fontFamily:"\"Playfair Display\",serif", fontSize:"1.4rem", fontWeight:800, color:"var(--primary)" }}>Elder Support Training PSW</span>
             <span style={{ fontSize:"0.58rem", fontWeight:500, color:"var(--text-light)", letterSpacing:2, textTransform:"uppercase", display:"block" }}>Canada · PSW Training</span>
           </div>
         </Link>

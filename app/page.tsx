@@ -20,9 +20,9 @@ export default function Home() {
 
       <div style={{ position:"relative", zIndex:1, maxWidth:900, width:"100%" }}>
         {/* Logo + Title */}
-        <img src="/logo.png" alt="Hanin Care" style={{ width:75, height:75, objectFit:"contain", filter:"drop-shadow(0 4px 20px rgba(0,0,0,0.3))", marginBottom:"0.75rem" }} />
+        <img src="/logo.png" alt="Elder Support Training PSW" style={{ width:75, height:75, objectFit:"contain", filter:"drop-shadow(0 4px 20px rgba(0,0,0,0.3))", marginBottom:"0.75rem" }} />
         <h1 style={{ fontFamily:"\"Playfair Display\",serif", fontSize:"clamp(1.9rem,4vw,3rem)", fontWeight:800, lineHeight:1.15, marginBottom:"0.3rem" }}>
-          Hanin Care <span style={{ color:"#7FFFC0" }}>Canada</span>
+          Elder Support Training PSW <span style={{ color:"#7FFFC0" }}>Canada</span>
         </h1>
         <p style={{ fontSize:"0.72rem", letterSpacing:3, textTransform:"uppercase", opacity:0.6, marginBottom:"0.75rem" }}>
           Training Platform for Elderly and Dementia Care
@@ -68,7 +68,7 @@ export default function Home() {
           ))}
         </div>
 
-        <p style={{ fontSize:"0.72rem", opacity:0.4 }}>© 2024 Hanin Care Canada · All rights reserved</p>
+        <p style={{ fontSize:"0.72rem", opacity:0.4 }}>© 2024 Elder Support Training PSW · All rights reserved</p>
       </div>
     </main>
   )

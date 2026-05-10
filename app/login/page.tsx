@@ -38,9 +38,9 @@ export default function LoginPage() {
       <div style={{ flex:1, background:"linear-gradient(135deg,#0A3D5C,#0F5A8A)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", color:"white", padding:"3rem", position:"relative", overflow:"hidden" }}>
         <div style={{ position:"absolute", top:-80, right:-80, width:400, height:400, background:"rgba(255,255,255,0.05)", borderRadius:"50%" }} />
         <div style={{ position:"relative", zIndex:1, textAlign:"center", maxWidth:400 }}>
-          <img src="/logo.png" alt="Hanin Care" style={{ width:90, height:90, objectFit:"contain", marginBottom:"1.25rem", filter:"drop-shadow(0 4px 20px rgba(0,0,0,0.3))" }} />
+          <img src="/logo.png" alt="Elder Support Training PSW" style={{ width:90, height:90, objectFit:"contain", marginBottom:"1.25rem", filter:"drop-shadow(0 4px 20px rgba(0,0,0,0.3))" }} />
           <h1 style={{ fontFamily:"\"Playfair Display\",serif", fontSize:"2rem", marginBottom:"0.75rem" }}>
-            Hanin Care <span style={{ color:"#7FFFC0" }}>Canada</span>
+            Elder Support Training PSW <span style={{ color:"#7FFFC0" }}>Canada</span>
           </h1>
           <p style={{ opacity:0.8, lineHeight:1.8, marginBottom:"2rem", fontSize:"0.92rem" }}>PSW Training Platform — evidence-based curriculum for Canadian healthcare standards.</p>
           <div style={{ display:"flex", flexDirection:"column", gap:"0.75rem" }}>

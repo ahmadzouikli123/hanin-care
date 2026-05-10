@@ -328,7 +328,7 @@ export default function CurriculumPage() {
       </div>
 
       <footer style={{ background:"var(--text)", color:"white", padding:"2rem", textAlign:"center" }}>
-        <p style={{ opacity:0.5, fontSize:"0.85rem" }}>© 2024 Hanin Care Canada · PSW Training Platform</p>
+        <p style={{ opacity:0.5, fontSize:"0.85rem" }}>© 2024 Elder Support Training PSW · PSW Training Platform</p>
       </footer>
     </div>
   )

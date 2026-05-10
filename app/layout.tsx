@@ -1,8 +1,8 @@
-﻿import type { Metadata } from "next"
+import type { Metadata } from "next"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "Hanin Care Canada | PSW Training",
+  title: "Elder Support Training PSW | PSW Training",
   description: "Professional Support Worker Training Platform — Canada",
 }
 

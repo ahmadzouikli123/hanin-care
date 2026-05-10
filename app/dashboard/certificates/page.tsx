@@ -184,7 +184,7 @@ if (logoB64) {
   // Small logo top center
   doc.addImage(logoB64, "PNG", W/2 - 15, 10, 30, 18)
 }
-      doc.text("HANIN CARE CANADA", W / 2, 30, { align: "center" })
+      doc.text("Elder Support Training PSW", W / 2, 30, { align: "center" })
 
       doc.setFontSize(8)
       doc.setTextColor(100, 100, 100)
@@ -282,7 +282,7 @@ if (logoB64) {
       doc.text("Hanin Zouikli", W / 2, 177, { align: "center" })
       doc.setFont("helvetica", "normal")
       doc.setFontSize(8)
-      doc.text("Program Director, Hanin Care Canada", W / 2, 182, { align: "center" })
+      doc.text("Program Director, Elder Support Training PSW", W / 2, 182, { align: "center" })
 
       // Standards badges
       const badges = ["Ontario HSCPOA", "BC CHW Standards", "Alberta ALIS"]

@@ -159,7 +159,7 @@ export default function AdminPage() {
           <div style={{ width: 40, height: 40, background: '#0F5A8A', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>🛡️</div>
           <div>
             <h1 style={{ fontWeight: 700, fontSize: '1.2rem', color: '#111827', margin: 0 }}>Admin Dashboard</h1>
-            <p style={{ fontSize: '0.75rem', color: '#9CA3AF', margin: 0 }}>Hanin Care Canada</p>
+            <p style={{ fontSize: '0.75rem', color: '#9CA3AF', margin: 0 }}>Elder Support Training PSW</p>
           </div>
         </div>
         <Link href="/dashboard" style={{ fontSize: '0.88rem', color: '#6B7280', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
