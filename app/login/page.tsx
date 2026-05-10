@@ -127,7 +127,7 @@ export default function LoginPage() {
       )}
 
       {/* Left panel */}
-      <div style={{ flex:1, background:"linear-gradient(135deg,#0A3D5C,#0F5A8A)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", color:"white", padding:"3rem", position:"relative", overflow:"hidden" }}>
+      <div className="mobile-hide" style={{ flex:1, background:"linear-gradient(135deg,#0A3D5C,#0F5A8A)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", color:"white", padding:"3rem", position:"relative", overflow:"hidden" }}>
         <div style={{ position:"absolute", top:-80, right:-80, width:400, height:400, background:"rgba(255,255,255,0.05)", borderRadius:"50%" }} />
         <div style={{ position:"relative", zIndex:1, textAlign:"center", maxWidth:400 }}>
           <img src="/logo.png" alt="Elder Support Training PSW" style={{ width:90, height:90, objectFit:"contain", marginBottom:"1.25rem", filter:"drop-shadow(0 4px 20px rgba(0,0,0,0.3))" }} />
