@@ -70,7 +70,7 @@ export default function RegisterPage() {
     if (user) {
       await supabase.from("profiles").update({ plan, first_name: firstName, last_name: lastName }).eq("id", user.id)
     }
-    router.push("/dashboard")
+    router.push("/verify-email")
   }
 
   const inp: React.CSSProperties = { width: "100%", padding: "0.85rem 1rem", border: "1.5px solid #D4E0ED", borderRadius: 10, fontSize: "0.95rem", fontFamily: "inherit", background: "#F5F7FA", color: "#1A2332", outline: "none", boxSizing: "border-box" }
