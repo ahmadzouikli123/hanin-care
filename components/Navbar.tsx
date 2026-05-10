@@ -4,21 +4,21 @@ import { usePathname, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { useEffect, useState } from "react"
 
+const ADMIN_EMAIL = "zouikliahmad68@gmail.com"
+
 export default function Navbar() {
   const pathname = usePathname()
   const router   = useRouter()
   const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user?.email === "zouikliahmad68@gmail.com") setIsAdmin(true)
+    createClient().auth.getUser().then(({ data }) => {
+      if (data.user?.email === ADMIN_EMAIL) setIsAdmin(true)
     })
   }, [])
 
   const logout = async () => {
-    const supabase = createClient()
-    await supabase.auth.signOut()
+    await createClient().auth.signOut()
     router.push("/")
   }
 
@@ -35,11 +35,11 @@ export default function Navbar() {
         <Link href="/dashboard" style={{ display:"flex", alignItems:"center", gap:"0.75rem", textDecoration:"none" }}>
           <img src="/logo.png" alt="Elder Support Training PSW" style={{ width:44, height:44, objectFit:"contain" }} />
           <div>
-            <span style={{ fontFamily:"\"Playfair Display\",serif", fontSize:"1.4rem", fontWeight:800, color:"var(--primary)" }}>Elder Support Training PSW</span>
+            <span style={{ fontFamily:"Playfair Display,serif", fontSize:"1.4rem", fontWeight:800, color:"var(--primary)" }}>Elder Support</span>
             <span style={{ fontSize:"0.58rem", fontWeight:500, color:"var(--text-light)", letterSpacing:2, textTransform:"uppercase", display:"block" }}>Canada · PSW Training</span>
           </div>
         </Link>
-        <ul style={{ display:"flex", gap:"0.25rem", listStyle:"none", alignItems:"center" }}>
+        <ul style={{ display:"flex", gap:"0.25rem", listStyle:"none", alignItems:"center", margin:0, padding:0 }}>
           {links.map(({ href, label }) => (
             <li key={href}>
               <Link href={href} style={{ textDecoration:"none", color:pathname.startsWith(href.split("/").slice(0,3).join("/"))?"var(--primary)":"var(--text-light)", fontWeight:500, fontSize:"0.9rem", padding:"0.5rem 1rem", borderRadius:8, background:pathname.startsWith(href.split("/").slice(0,3).join("/"))?"var(--beg-bg)":"transparent", display:"block" }}>
@@ -47,8 +47,6 @@ export default function Navbar() {
               </Link>
             </li>
           ))}
-
-          {/* Admin link — only for admins */}
           {isAdmin && (
             <li>
               <Link href="/admin" style={{ textDecoration:"none", color:"white", fontWeight:600, fontSize:"0.85rem", padding:"0.5rem 1rem", borderRadius:8, background:"#0F5A8A", display:"block" }}>
@@ -56,7 +54,6 @@ export default function Navbar() {
               </Link>
             </li>
           )}
-
           <li>
             <button onClick={logout} style={{ background:"var(--primary)", color:"white", padding:"0.6rem 1.4rem", borderRadius:8, fontWeight:600, fontSize:"0.9rem", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
               Sign Out
