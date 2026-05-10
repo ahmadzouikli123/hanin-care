@@ -80,7 +80,7 @@ export default function RegisterPage() {
     <div style={{ minHeight: "100vh", display: "flex" }}>
 
       {/* LEFT */}
-      <div style={{ flex: 1, background: "linear-gradient(135deg,#0A3D5C,#0F5A8A)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "white", padding: "3rem" }}>
+      <div className="mobile-hide" style={{ flex: 1, background: "linear-gradient(135deg,#0A3D5C,#0F5A8A)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "white", padding: "3rem" }}>
         <div style={{ textAlign: "center", maxWidth: 420 }}>
           <img src="/logo.png" alt="Hanin" style={{ width: 110, height: 110, objectFit: "contain", marginBottom: "1.5rem" }} />
           <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: "2rem", marginBottom: "0.5rem" }}>
