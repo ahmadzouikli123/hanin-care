@@ -125,7 +125,7 @@ export default function CurriculumPage() {
               <div style={{ display:"flex", gap:"1rem", flexWrap:"wrap" }}>
                 {[
                   { icon:"📚", text:"27 Units" },
-                  { icon:"⏱️", text:"600+ Hours" },
+                  { icon:"⏱️", text:"250+ Hours" },
                   { icon:"✅", text:`${totalCompleted}/${totalAccessible} Completed` },
                   { icon:"🇨🇦", text:"Canadian Standards" },
                 ].map(({ icon, text }) => (
