@@ -9,13 +9,6 @@ const ADMIN_EMAIL = "zouikliahmad68@gmail.com"
 export default function Navbar() {
   const pathname = usePathname()
   const router   = useRouter()
-  const [isAdmin, setIsAdmin] = useState(false)
-
-  useEffect(() => {
-    createClient().auth.getUser().then(({ data }) => {
-      if (data.user?.email === ADMIN_EMAIL) setIsAdmin(true)
-    })
-  }, [])
 
   const logout = async () => {
     await createClient().auth.signOut()
@@ -47,13 +40,6 @@ export default function Navbar() {
               </Link>
             </li>
           ))}
-          {isAdmin && (
-            <li>
-              <Link href="/admin" style={{ textDecoration:"none", color:"white", fontWeight:600, fontSize:"0.85rem", padding:"0.5rem 1rem", borderRadius:8, background:"#0F5A8A", display:"block" }}>
-                Admin
-              </Link>
-            </li>
-          )}
           <li>
             <button onClick={logout} style={{ background:"var(--primary)", color:"white", padding:"0.6rem 1.4rem", borderRadius:8, fontWeight:600, fontSize:"0.9rem", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
               Sign Out
