@@ -475,7 +475,7 @@ export const CURRICULUM_STRUCTURE = [
     border: "#A8D9E8",
     headerBg: "linear-gradient(135deg,#E8F5F9,#D1EBF3)",
     icon: "🌱",
-    hours: "140",
+    hours: "80",
     desc: "Build your core knowledge base covering the Canadian healthcare system, professional ethics, communication, infection control, and fundamental personal care skills.",
     units: [
       { num: 1,  title: "The Canadian Healthcare System",          duration: "20h", questions: 5  },
@@ -496,7 +496,7 @@ export const CURRICULUM_STRUCTURE = [
     border: "#FCD34D",
     headerBg: "linear-gradient(135deg,#FFFBEB,#FEF3C7)",
     icon: "📈",
-    hours: "220",
+    hours: "100",
     desc: "Advance your skills in complex care needs, cognitive conditions, chronic disease management, and professional practice.",
     units: [
       { num: 9,  title: "Clinical Observations",                   duration: "24h", questions: 5  },
@@ -519,7 +519,7 @@ export const CURRICULUM_STRUCTURE = [
     border: "#C4B5FD",
     headerBg: "linear-gradient(135deg,#F5F3FF,#EDE9FE)",
     icon: "🏆",
-    hours: "240",
+    hours: "70",
     desc: "Master leadership, complex clinical situations, specialty care, and advocate for clients at the highest level.",
     units: [
       { num: 19, title: "Complex Medical Conditions",              duration: "28h", questions: 5  },
