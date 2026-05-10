@@ -12,6 +12,13 @@ export default function LoginPage() {
   const [loading, setLoading]   = useState(false)
   const [gLoading, setGLoading] = useState(false)
 
+  // Admin modal
+  const [showAdmin, setShowAdmin]       = useState(false)
+  const [adminEmail, setAdminEmail]     = useState("")
+  const [adminPass, setAdminPass]       = useState("")
+  const [adminError, setAdminError]     = useState("")
+  const [adminLoading, setAdminLoading] = useState(false)
+
   const handleGoogle = async () => {
     setGLoading(true)
     const supabase = createClient()
@@ -29,18 +36,103 @@ export default function LoginPage() {
     else router.push("/dashboard")
   }
 
+  const handleAdminLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setAdminLoading(true)
+    setAdminError("")
+    const supabase = createClient()
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: adminEmail,
+      password: adminPass,
+    })
+    if (error) {
+      setAdminError("Invalid credentials. Access denied.")
+      setAdminLoading(false)
+      return
+    }
+    // Check is_admin
+    const { data: profile } = await supabase
+      .from("profiles").select("is_admin").eq("id", data.user.id).single()
+    if (!(profile as any)?.is_admin) {
+      await supabase.auth.signOut()
+      setAdminError("You do not have admin privileges.")
+      setAdminLoading(false)
+      return
+    }
+    router.push("/admin")
+  }
+
   const inp: React.CSSProperties = { width:"100%", padding:"0.85rem 1rem", border:"1.5px solid var(--border)", borderRadius:10, fontSize:"0.95rem", fontFamily:"inherit", background:"var(--bg)", color:"var(--text)", outline:"none" }
   const lbl: React.CSSProperties = { display:"block", fontSize:"0.85rem", fontWeight:600, color:"var(--text)", marginBottom:"0.5rem" }
 
   return (
     <div style={{ minHeight:"100vh", display:"flex" }}>
+
+      {/* Admin Modal */}
+      {showAdmin && (
+        <div style={{ position:"fixed", inset:0, zIndex:2000, background:"rgba(0,0,0,0.5)", display:"flex", alignItems:"center", justifyContent:"center", padding:"1rem" }}>
+          <div style={{ background:"white", borderRadius:20, padding:"2.5rem", width:"100%", maxWidth:380, boxShadow:"0 20px 60px rgba(0,0,0,0.3)" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:"1rem", marginBottom:"1.75rem" }}>
+              <div style={{ width:44, height:44, background:"#0F5A8A", borderRadius:12, display:"flex", alignItems:"center", justifyContent:"center", fontSize:"1.3rem" }}>🛡️</div>
+              <div>
+                <h3 style={{ fontWeight:700, fontSize:"1.1rem", margin:0 }}>Admin Portal</h3>
+                <p style={{ fontSize:"0.78rem", color:"var(--text-light)", margin:0 }}>Restricted access only</p>
+              </div>
+            </div>
+
+            {adminError && (
+              <div style={{ background:"#FEF2F2", border:"1px solid #FCA5A5", borderRadius:10, padding:"0.75rem 1rem", marginBottom:"1.25rem", color:"#DC2626", fontSize:"0.88rem" }}>
+                🚫 {adminError}
+              </div>
+            )}
+
+            <form onSubmit={handleAdminLogin} style={{ display:"flex", flexDirection:"column", gap:"1.25rem" }}>
+              <div>
+                <label style={lbl}>Admin Email</label>
+                <input
+                  type="email" required
+                  value={adminEmail}
+                  onChange={e => setAdminEmail(e.target.value)}
+                  placeholder="admin@example.com"
+                  style={inp}
+                />
+              </div>
+              <div>
+                <label style={lbl}>Password</label>
+                <input
+                  type="password" required
+                  value={adminPass}
+                  onChange={e => setAdminPass(e.target.value)}
+                  placeholder="••••••••"
+                  style={inp}
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={adminLoading}
+                style={{ background:"#0F5A8A", color:"white", padding:"0.9rem", borderRadius:10, border:"none", fontWeight:700, fontSize:"1rem", cursor:adminLoading?"wait":"pointer", opacity:adminLoading?0.7:1, fontFamily:"inherit" }}
+              >
+                {adminLoading ? "Verifying…" : "Access Admin Panel →"}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setShowAdmin(false); setAdminError(""); setAdminEmail(""); setAdminPass("") }}
+                style={{ background:"transparent", border:"1.5px solid var(--border)", color:"var(--text-light)", padding:"0.75rem", borderRadius:10, fontWeight:600, cursor:"pointer", fontFamily:"inherit" }}
+              >
+                Cancel
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Left panel */}
       <div style={{ flex:1, background:"linear-gradient(135deg,#0A3D5C,#0F5A8A)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", color:"white", padding:"3rem", position:"relative", overflow:"hidden" }}>
         <div style={{ position:"absolute", top:-80, right:-80, width:400, height:400, background:"rgba(255,255,255,0.05)", borderRadius:"50%" }} />
         <div style={{ position:"relative", zIndex:1, textAlign:"center", maxWidth:400 }}>
           <img src="/logo.png" alt="Elder Support Training PSW" style={{ width:90, height:90, objectFit:"contain", marginBottom:"1.25rem", filter:"drop-shadow(0 4px 20px rgba(0,0,0,0.3))" }} />
           <h1 style={{ fontFamily:"\"Playfair Display\",serif", fontSize:"2rem", marginBottom:"0.75rem" }}>
-            Elder Support Training PSW <span style={{ color:"#7FFFC0" }}>Canada</span>
+            Elder Support Training <span style={{ color:"#7FFFC0" }}>PSW</span>
           </h1>
           <p style={{ opacity:0.8, lineHeight:1.8, marginBottom:"2rem", fontSize:"0.92rem" }}>PSW Training Platform — evidence-based curriculum for Canadian healthcare standards.</p>
           <div style={{ display:"flex", flexDirection:"column", gap:"0.75rem" }}>
@@ -92,6 +184,16 @@ export default function LoginPage() {
           <p style={{ textAlign:"center", marginTop:"1.5rem", color:"var(--text-light)", fontSize:"0.9rem" }}>
             No account? <Link href="/register" style={{ color:"var(--primary)", fontWeight:600, textDecoration:"none" }}>Create one free</Link>
           </p>
+
+          {/* Admin Portal link */}
+          <div style={{ textAlign:"center", marginTop:"2rem", paddingTop:"1.5rem", borderTop:"1px solid var(--border)" }}>
+            <button
+              onClick={() => setShowAdmin(true)}
+              style={{ background:"none", border:"none", color:"#9CA3AF", fontSize:"0.78rem", cursor:"pointer", fontFamily:"inherit", display:"inline-flex", alignItems:"center", gap:"0.4rem" }}
+            >
+              🛡️ Admin Portal
+            </button>
+          </div>
         </div>
       </div>
     </div>
