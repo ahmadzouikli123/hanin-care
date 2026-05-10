@@ -3,7 +3,7 @@ import Link from "next/link"
 export default function Home() {
   const stats = [
     { num: "27",   label: "Units"     },
-    { num: "600+", label: "Hours"     },
+    { num: "250+", label: "Hours"     },
     { num: "100+", label: "Questions" },
     { num: "100%", label: "Canadian"  },
   ]
