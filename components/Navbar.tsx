@@ -11,12 +11,8 @@ export default function Navbar() {
 
   useEffect(() => {
     const supabase = createClient()
-    supabase.auth.getUser().then(async ({ data }) => {
-      if (data.user) {
-        const { data: profile } = await supabase
-          .from("profiles").select("is_admin").eq("id", data.user.id).single()
-        if ((profile as any)?.is_admin) setIsAdmin(true)
-      }
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user?.email === "zouikliahmad68@gmail.com") setIsAdmin(true)
     })
   }, [])
 
