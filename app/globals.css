@@ -53,3 +53,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
   h1[style*="2.2rem"] { font-size: 1.6rem !important; }
   h1[style*="2.5rem"] { font-size: 1.8rem !important; }
 }
+@media (max-width: 768px) {
+  .mobile-hide { display: none !important; }
+}
