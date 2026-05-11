@@ -201,6 +201,11 @@ export default function CurriculumPage() {
                   </span>
                   <span style={{ display:"flex", alignItems:"center", gap:"0.5rem", fontSize:"0.88rem", fontWeight:600, color: isLocked ? "#94A3B8" : lv.color }}>
                     ⏱️ {lv.hours} Hours
+                    {!isLocked && lvCompleted >= lv.units.length && (
+  <Link href={`/dashboard/exam/${lv.level}`} style={{ display:"inline-flex", alignItems:"center", gap:"0.5rem", background:"#15803D", color:"white", padding:"0.4rem 1rem", borderRadius:20, fontSize:"0.82rem", fontWeight:700, textDecoration:"none" }}>
+    🎓 Take Level Exam
+  </Link>
+)}
                   </span>
                   {!isLocked && (
                     <span style={{ display:"flex", alignItems:"center", gap:"0.5rem", fontSize:"0.88rem", fontWeight:700, color:"#15803D", background:"#DCFCE7", padding:"0.25rem 0.75rem", borderRadius:20 }}>
