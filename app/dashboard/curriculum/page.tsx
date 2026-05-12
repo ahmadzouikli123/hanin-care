@@ -1,8 +1,7 @@
 "use client"
-import { Suspense } from "react"
-import { useState, useEffect } from "react"
-import { useSearchParams } from "next/navigation"
+import { useState, useEffect, Suspense } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { CURRICULUM_STRUCTURE } from "@/lib/curriculum-data"
 
@@ -13,22 +12,38 @@ const PLAN_ACCESS: Record<string, string[]> = {
 }
 
 const PLAN_LABELS: Record<string, { icon: string; label: string; color: string }> = {
-  beginner: { icon:"ðŸŒ±", label:"Beginner Plan",  color:"var(--beg)" },
-  standard: { icon:"ðŸ“ˆ", label:"Standard Plan",  color:"var(--int)" },
-  advanced: { icon:"ðŸ†", label:"Advanced Plan",  color:"var(--adv)" },
+  beginner: { icon:"🌱", label:"Beginner Plan",  color:"var(--beg)" },
+  standard: { icon:"📊", label:"Standard Plan",  color:"var(--int)" },
+  advanced: { icon:"🏆", label:"Advanced Plan",  color:"var(--adv)" },
+}
+
+// Level display names for the tab buttons
+const LEVEL_LABELS: Record<string, { label: string; icon: string; color: string; bg: string }> = {
+  beginner:     { label:"Beginner",     icon:"🌱", color:"var(--beg)", bg:"var(--beg-bg)" },
+  intermediate: { label:"Intermediate", icon:"📊", color:"var(--int)", bg:"var(--int-bg)" },
+  advanced:     { label:"Advanced",     icon:"🏆", color:"var(--adv)", bg:"var(--adv-bg)" },
 }
 
 function CurriculumContent() {
-  const [openUnit, setOpenUnit]       = useState<string|null>(null)
-  const [plan, setPlan]               = useState<string>("beginner")
-  const [loading, setLoading]         = useState(true)
-  const [userId, setUserId]           = useState<string|null>(null)
-  const [completedUnits, setCompleted] = useState<Set<number>>(new Set())
   const searchParams = useSearchParams()
-  const levelFilter = searchParams.get("level")
-  const [marking, setMarking]         = useState<number|null>(null)
+  // ✅ قراءة ?level= من الـ URL، الافتراضي beginner
+  const levelParam = searchParams.get("level") || "beginner"
+
+  const [openUnit, setOpenUnit]        = useState<string|null>(null)
+  const [plan, setPlan]                = useState<string>("beginner")
+  const [loading, setLoading]          = useState(true)
+  const [userId, setUserId]            = useState<string|null>(null)
+  const [completedUnits, setCompleted] = useState<Set<number>>(new Set())
+  const [marking, setMarking]          = useState<number|null>(null)
+  // ✅ المستوى النشط
+  const [activeLevel, setActiveLevel]  = useState<string>(levelParam)
 
   const supabase = createClient()
+
+  // ✅ تحديث المستوى النشط عند تغيير الـ URL
+  useEffect(() => {
+    setActiveLevel(levelParam)
+  }, [levelParam])
 
   useEffect(() => { loadData() }, [])
 
@@ -38,20 +53,17 @@ function CurriculumContent() {
       const uid = authData.user.id
       setUserId(uid)
 
-      // Get plan
       const { data: profile } = await supabase
         .from("profiles").select("plan").eq("id", uid).single()
       if ((profile as any)?.plan) setPlan((profile as any).plan)
       else if (authData.user.user_metadata?.plan) setPlan(authData.user.user_metadata.plan)
 
-      // Get completed units
       const { data: progress } = await supabase
         .from("unit_progress")
         .select("unit_id, is_completed")
         .eq("user_id", uid)
         .eq("is_completed", true)
 
-      // Get unit IDs â†’ unit numbers mapping
       const { data: units } = await supabase
         .from("units").select("id, unit_number")
 
@@ -70,21 +82,15 @@ function CurriculumContent() {
   const markComplete = async (unitNum: number) => {
     if (!userId || marking !== null) return
     setMarking(unitNum)
-
-    // Get unit UUID
     const { data: unitRow } = await supabase
       .from("units").select("id").eq("unit_number", unitNum).single()
-
     if (!unitRow) { setMarking(null); return }
-
-    // Upsert progress
     await supabase.from("unit_progress").upsert({
       user_id:      userId,
       unit_id:      unitRow.id,
       completed:    true,
       completed_at: new Date().toISOString(),
     }, { onConflict: "user_id,unit_id" })
-
     setCompleted(prev => new Set([...prev, unitNum]))
     setMarking(null)
   }
@@ -92,17 +98,19 @@ function CurriculumContent() {
   const accessible = PLAN_ACCESS[plan] || ["beginner"]
   const planInfo   = PLAN_LABELS[plan]
 
-  // Total completed across all accessible levels
   const totalAccessible = CURRICULUM_STRUCTURE
     .filter(lv => accessible.includes(lv.level))
     .reduce((sum, lv) => sum + lv.units.length, 0)
   const totalCompleted = completedUnits.size
 
+  // ✅ فلترة: عرض المستوى النشط فقط
+  const visibleLevels = CURRICULUM_STRUCTURE.filter(lv => lv.level === activeLevel)
+
   if (loading) return (
     <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"var(--bg)" }}>
       <div style={{ textAlign:"center", color:"var(--text-light)" }}>
-        <div style={{ fontSize:"2rem", marginBottom:"1rem" }}>â³</div>
-        <p>Loading your curriculumâ€¦</p>
+        <div style={{ fontSize:"2rem", marginBottom:"1rem" }}>⏳</div>
+        <p>Loading your curriculum…</p>
       </div>
     </div>
   )
@@ -116,7 +124,7 @@ function CurriculumContent() {
         <div style={{ maxWidth:1400, margin:"0 auto", position:"relative", zIndex:1 }}>
           <div style={{ display:"flex", alignItems:"center", gap:"0.5rem", fontSize:"0.82rem", opacity:0.7, marginBottom:"1rem" }}>
             <Link href="/dashboard" style={{ color:"white", textDecoration:"none" }}>Dashboard</Link>
-            <span>â€º</span><span>Curriculum</span>
+            <span>║</span><span>Curriculum</span>
           </div>
           <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", flexWrap:"wrap", gap:"1.5rem" }}>
             <div>
@@ -124,14 +132,14 @@ function CurriculumContent() {
                 PSW Training <span style={{ color:"var(--accent-green)" }}>Curriculum</span>
               </h1>
               <p style={{ opacity:0.85, maxWidth:600, lineHeight:1.8, marginBottom:"1.5rem" }}>
-                27 units across 3 levels â€” aligned with Canadian PSW standards (Ontario, BC, Alberta).
+                27 units across 3 levels — aligned with Canadian PSW standards.
               </p>
               <div style={{ display:"flex", gap:"1rem", flexWrap:"wrap" }}>
                 {[
-                  { icon:"ðŸ“š", text:"27 Units" },
-                  { icon:"â±ï¸", text:"250+ Hours" },
-                  { icon:"âœ…", text:`${totalCompleted}/${totalAccessible} Completed` },
-                  { icon:"ðŸ‡¨ðŸ‡¦", text:"Canadian Standards" },
+                  { icon:"📜", text:"27 Units" },
+                  { icon:"⏱", text:"250+ Hours" },
+                  { icon:"✅", text:`${totalCompleted}/${totalAccessible} Completed` },
+                  { icon:"🇨🇦", text:"Canadian Standards" },
                 ].map(({ icon, text }) => (
                   <div key={text} style={{ display:"inline-flex", alignItems:"center", gap:"0.5rem", background:"rgba(255,255,255,0.12)", border:"1px solid rgba(255,255,255,0.2)", padding:"0.4rem 1rem", borderRadius:20, fontSize:"0.85rem" }}>
                     {icon} {text}
@@ -148,7 +156,7 @@ function CurriculumContent() {
                 {accessible.length === 1 ? "Level 1 access" : accessible.length === 2 ? "Level 1 & 2 access" : "Full access"}
               </div>
               <Link href="/dashboard" style={{ display:"inline-block", marginTop:"0.75rem", background:"rgba(255,255,255,0.2)", color:"white", padding:"0.35rem 0.9rem", borderRadius:8, fontSize:"0.78rem", fontWeight:600, textDecoration:"none" }}>
-                Upgrade â†—
+                Upgrade →
               </Link>
             </div>
           </div>
@@ -168,19 +176,57 @@ function CurriculumContent() {
         </div>
       </div>
 
+      {/* ✅ Level Tabs */}
+      <div style={{ background:"white", borderBottom:"2px solid var(--border)", padding:"0 2rem" }}>
+        <div style={{ maxWidth:1400, margin:"0 auto", display:"flex", gap:"0" }}>
+          {CURRICULUM_STRUCTURE.map(lv => {
+            const isLocked  = !accessible.includes(lv.level)
+            const isActive  = activeLevel === lv.level
+            const lvInfo    = LEVEL_LABELS[lv.level]
+            return (
+              <button
+                key={lv.level}
+                onClick={() => !isLocked && setActiveLevel(lv.level)}
+                disabled={isLocked}
+                style={{
+                  padding:"1rem 1.75rem",
+                  fontWeight:700,
+                  fontSize:"0.88rem",
+                  color: isLocked ? "#CBD5E1" : isActive ? lvInfo.color : "var(--text-light)",
+                  border:"none",
+                  background:"none",
+                  cursor: isLocked ? "not-allowed" : "pointer",
+                  borderBottom:`3px solid ${isActive ? lvInfo.color : "transparent"}`,
+                  marginBottom:-2,
+                  fontFamily:"inherit",
+                  display:"flex",
+                  alignItems:"center",
+                  gap:"0.5rem",
+                  transition:"all 0.2s",
+                }}
+              >
+                {isLocked ? "🔒" : lvInfo.icon} {lvInfo.label}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
       <div style={{ maxWidth:1400, margin:"0 auto", padding:"2.5rem 2rem" }}>
-        {CURRICULUM_STRUCTURE.filter(lv => !levelFilter || lv.level === levelFilter).map(lv => {
-          const isLocked = !accessible.includes(lv.level)
+
+        {/* ✅ عرض المستوى النشط فقط */}
+        {visibleLevels.map(lv => {
+          const isLocked   = !accessible.includes(lv.level)
           const lvCompleted = lv.units.filter(u => completedUnits.has(u.num)).length
 
           return (
-            <div key={lv.level} style={{ marginBottom:"4rem", opacity: isLocked ? 0.6 : 1 }}>
+            <div key={lv.level} style={{ marginBottom:"4rem" }}>
 
               {/* Level header */}
               <div style={{ background: isLocked ? "#F1F5F9" : lv.headerBg, border:`2px solid ${isLocked ? "#CBD5E1" : lv.border}`, borderRadius:20, padding:"2.5rem", marginBottom:"2rem", position:"relative" }}>
                 {isLocked && (
                   <div style={{ position:"absolute", top:20, right:20, background:"#64748B", color:"white", borderRadius:10, padding:"0.4rem 1rem", fontSize:"0.8rem", fontWeight:700 }}>
-                    ðŸ”’ Locked
+                    🔒 Locked
                   </div>
                 )}
                 <div style={{ display:"inline-flex", alignItems:"center", gap:"0.5rem", background: isLocked ? "#94A3B8" : lv.color, color:"white", borderRadius:20, padding:"0.4rem 1rem", fontSize:"0.82rem", fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:"1rem" }}>
@@ -190,7 +236,7 @@ function CurriculumContent() {
                 <p style={{ color: isLocked ? "#94A3B8" : "var(--text-light)", maxWidth:700, lineHeight:1.8 }}>{lv.desc}</p>
                 {isLocked && (
                   <div style={{ marginTop:"1.25rem", background:"white", borderRadius:12, padding:"1rem 1.25rem", display:"inline-flex", alignItems:"center", gap:"0.75rem", border:"1px solid #CBD5E1" }}>
-                    <span style={{ fontSize:"1.2rem" }}>ðŸ”’</span>
+                    <span style={{ fontSize:"1.2rem" }}>🔒</span>
                     <div>
                       <div style={{ fontWeight:700, fontSize:"0.88rem", color:"#475569" }}>This level requires a higher plan</div>
                       <div style={{ fontSize:"0.78rem", color:"#94A3B8" }}>
@@ -201,19 +247,19 @@ function CurriculumContent() {
                 )}
                 <div style={{ display:"flex", gap:"2rem", marginTop:"1.5rem", flexWrap:"wrap", alignItems:"center" }}>
                   <span style={{ display:"flex", alignItems:"center", gap:"0.5rem", fontSize:"0.88rem", fontWeight:600, color: isLocked ? "#94A3B8" : lv.color }}>
-                    ðŸ“– {lv.units.length} Units
+                    📘 {lv.units.length} Units
                   </span>
                   <span style={{ display:"flex", alignItems:"center", gap:"0.5rem", fontSize:"0.88rem", fontWeight:600, color: isLocked ? "#94A3B8" : lv.color }}>
-                    â±ï¸ {lv.hours} Hours
-                    {!isLocked && lvCompleted >= lv.units.length && (
-  <Link href={`/dashboard/exam/${lv.level}`} style={{ display:"inline-flex", alignItems:"center", gap:"0.5rem", background:"#15803D", color:"white", padding:"0.4rem 1rem", borderRadius:20, fontSize:"0.82rem", fontWeight:700, textDecoration:"none" }}>
-    ðŸŽ“ Take Level Exam
-  </Link>
-)}
+                    ⏱ {lv.hours} Hours
                   </span>
+                  {!isLocked && lvCompleted >= lv.units.length && (
+                    <Link href={`/dashboard/exam/${lv.level}`} style={{ display:"inline-flex", alignItems:"center", gap:"0.5rem", background:"#15803D", color:"white", padding:"0.4rem 1rem", borderRadius:20, fontSize:"0.82rem", fontWeight:700, textDecoration:"none" }}>
+                      🎓 Take Level Exam
+                    </Link>
+                  )}
                   {!isLocked && (
                     <span style={{ display:"flex", alignItems:"center", gap:"0.5rem", fontSize:"0.88rem", fontWeight:700, color:"#15803D", background:"#DCFCE7", padding:"0.25rem 0.75rem", borderRadius:20 }}>
-                      âœ… {lvCompleted}/{lv.units.length} completed
+                      ✅ {lvCompleted}/{lv.units.length} completed
                     </span>
                   )}
                 </div>
@@ -221,9 +267,9 @@ function CurriculumContent() {
 
               {/* Units */}
               {lv.units.map(unit => {
-                const key = `${lv.level}-${unit.num}`
-                const isOpen = openUnit === key
-                const isDone = completedUnits.has(unit.num)
+                const key       = `${lv.level}-${unit.num}`
+                const isOpen    = openUnit === key
+                const isDone    = completedUnits.has(unit.num)
                 const isMarking = marking === unit.num
 
                 return (
@@ -236,16 +282,12 @@ function CurriculumContent() {
                     overflow:"hidden",
                     transition:"all 0.3s",
                   }}>
-
-                    {/* Top progress strip */}
                     <div style={{ height:4, background: isLocked ? "#E2E8F0" : isDone ? "#22C55E" : "var(--border)" }} />
 
-                    {/* Unit header */}
                     <div
                       onClick={() => !isLocked && setOpenUnit(isOpen ? null : key)}
                       style={{ padding:"1.5rem 2rem", display:"flex", alignItems:"center", gap:"1.25rem", cursor: isLocked ? "not-allowed" : "pointer" }}
                     >
-                      {/* Unit number / checkmark */}
                       <div style={{
                         width:52, height:52, borderRadius:14, flexShrink:0,
                         background: isLocked ? "#CBD5E1" : isDone ? "#22C55E" : lv.color,
@@ -254,7 +296,7 @@ function CurriculumContent() {
                         fontWeight:700, fontSize: isDone ? "1.5rem" : "1.1rem",
                         transition:"all 0.3s",
                       }}>
-                        {isLocked ? "ðŸ”’" : isDone ? "âœ“" : unit.num}
+                        {isLocked ? "🔒" : isDone ? "✔" : unit.num}
                       </div>
 
                       <div style={{ flex:1 }}>
@@ -264,13 +306,13 @@ function CurriculumContent() {
                           </h3>
                           {isDone && (
                             <span style={{ background:"#DCFCE7", color:"#15803D", padding:"0.15rem 0.6rem", borderRadius:20, fontSize:"0.72rem", fontWeight:700 }}>
-                              âœ… Completed
+                              ✅ Completed
                             </span>
                           )}
                         </div>
                         <div style={{ display:"flex", gap:"1rem", fontSize:"0.8rem", color:"var(--text-light)" }}>
-                          <span>â±ï¸ {unit.duration}</span>
-                          <span>â“ {unit.questions} questions</span>
+                          <span>⏱ {unit.duration}</span>
+                          <span>❓ {unit.questions} questions</span>
                           <span style={{ background: isLocked ? "#F1F5F9" : isDone ? "#DCFCE7" : lv.bg, color: isLocked ? "#94A3B8" : isDone ? "#15803D" : lv.color, padding:"0.15rem 0.6rem", borderRadius:6, fontWeight:600 }}>
                             {lv.label}
                           </span>
@@ -278,12 +320,11 @@ function CurriculumContent() {
                       </div>
 
                       {isLocked
-                        ? <span style={{ color:"#CBD5E1", fontSize:"1.2rem" }}>ðŸ”’</span>
-                        : <span style={{ color: isDone ? "#22C55E" : "var(--text-light)", transform:isOpen?"rotate(180deg)":"rotate(0)", transition:"transform 0.3s", fontSize:"1.2rem" }}>â–¾</span>
+                        ? <span style={{ color:"#CBD5E1", fontSize:"1.2rem" }}>🔒</span>
+                        : <span style={{ color: isDone ? "#22C55E" : "var(--text-light)", transform:isOpen?"rotate(180deg)":"rotate(0)", transition:"transform 0.3s", fontSize:"1.2rem" }}>▼</span>
                       }
                     </div>
 
-                    {/* Unit body */}
                     {isOpen && !isLocked && (
                       <div style={{ borderTop:`1px solid ${isDone ? "#BBF7D0" : "var(--border)"}`, padding:"1.5rem 2rem", background: isDone ? "#F0FDF4" : "white" }}>
                         <p style={{ color:"var(--text-light)", fontSize:"0.93rem", lineHeight:1.8, marginBottom:"1.5rem" }}>
@@ -291,13 +332,11 @@ function CurriculumContent() {
                         </p>
                         <div style={{ display:"flex", gap:"1rem", flexWrap:"wrap", alignItems:"center" }}>
                           <Link href={`/dashboard/unit/${unit.num}`} style={{ background:lv.color, color:"white", padding:"0.7rem 1.5rem", borderRadius:10, fontWeight:600, fontSize:"0.9rem", textDecoration:"none" }}>
-                            ðŸ“– Study Unit {unit.num} â†’
+                            📘 Study Unit {unit.num} →
                           </Link>
                           <Link href={`/dashboard/unit/${unit.num}`} style={{ background:lv.bg, color:lv.color, padding:"0.7rem 1.5rem", borderRadius:10, fontWeight:600, fontSize:"0.9rem", textDecoration:"none" }}>
-                            ðŸ§  Take Quiz â†’
+                            🧠 Take Quiz →
                           </Link>
-
-                          {/* Mark as Complete button */}
                           {!isDone ? (
                             <button
                               onClick={(e) => { e.stopPropagation(); markComplete(unit.num) }}
@@ -318,11 +357,11 @@ function CurriculumContent() {
                                 gap:"0.5rem",
                               }}
                             >
-                              {isMarking ? "â³ Savingâ€¦" : "âœ… Mark as Complete"}
+                              {isMarking ? "⏳ Saving…" : "✅ Mark as Complete"}
                             </button>
                           ) : (
                             <div style={{ display:"flex", alignItems:"center", gap:"0.5rem", color:"#15803D", fontWeight:700, fontSize:"0.9rem" }}>
-                              âœ… Unit Completed!
+                              ✅ Unit Completed!
                             </div>
                           )}
                         </div>
@@ -337,7 +376,7 @@ function CurriculumContent() {
       </div>
 
       <footer style={{ background:"var(--text)", color:"white", padding:"2rem", textAlign:"center" }}>
-        <p style={{ opacity:0.5, fontSize:"0.85rem" }}>Â© 2024 Elder Support Training PSW Â· PSW Training Platform</p>
+        <p style={{ opacity:0.5, fontSize:"0.85rem" }}>© 2024 Elder Support Training PSW · PSW Training Platform</p>
       </footer>
     </div>
   )
@@ -345,7 +384,11 @@ function CurriculumContent() {
 
 export default function CurriculumPage() {
   return (
-    <Suspense fallback={<div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center"}}><p>Loading...</p></div>}>
+    <Suspense fallback={
+      <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center" }}>
+        <p>Loading…</p>
+      </div>
+    }>
       <CurriculumContent />
     </Suspense>
   )
