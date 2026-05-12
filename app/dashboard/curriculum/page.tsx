@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { CURRICULUM_STRUCTURE } from "@/lib/curriculum-data"
@@ -22,6 +23,8 @@ export default function CurriculumPage() {
   const [loading, setLoading]         = useState(true)
   const [userId, setUserId]           = useState<string|null>(null)
   const [completedUnits, setCompleted] = useState<Set<number>>(new Set())
+  const searchParams = useSearchParams()
+  const levelFilter = searchParams.get("level")
   const [marking, setMarking]         = useState<number|null>(null)
 
   const supabase = createClient()
@@ -165,7 +168,7 @@ export default function CurriculumPage() {
       </div>
 
       <div style={{ maxWidth:1400, margin:"0 auto", padding:"2.5rem 2rem" }}>
-        {CURRICULUM_STRUCTURE.map(lv => {
+        {CURRICULUM_STRUCTURE.filter(lv => !levelFilter || lv.level === levelFilter).map(lv => {
           const isLocked = !accessible.includes(lv.level)
           const lvCompleted = lv.units.filter(u => completedUnits.has(u.num)).length
 

@@ -184,7 +184,7 @@ export default function DashboardPage() {
               </div>
               {lv.locked
                 ? <div style={{ textAlign:"center", background:"#F1F5F9", color:"#94A3B8", padding:"0.7rem", borderRadius:10, fontWeight:600, fontSize:"0.88rem" }}>🔒 Upgrade to unlock</div>
-                : <Link href="/dashboard/curriculum" style={{ display:"block", textAlign:"center", background:lv.bg, color:lv.color, padding:"0.7rem", borderRadius:10, fontWeight:600, fontSize:"0.9rem", textDecoration:"none" }}>Start Learning →</Link>
+                : <Link href={`/dashboard/curriculum?level=${lv.id}`} style={{ display:"block", textAlign:"center", background:lv.bg, color:lv.color, padding:"0.7rem", borderRadius:10, fontWeight:600, fontSize:"0.9rem", textDecoration:"none" }}>Start Learning →</Link>
               }
             </div>
           ))}
