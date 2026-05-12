@@ -1,4 +1,4 @@
-// lib/curriculum-data.ts
+﻿// lib/curriculum-data.ts
 // Real curriculum content extracted from hanin_v2.html & hanin_curriculum.html
 
 export interface TheoryBlock {
@@ -499,16 +499,16 @@ export const CURRICULUM_STRUCTURE = [
     hours: "100",
     desc: "Advance your skills in complex care needs, cognitive conditions, chronic disease management, and professional practice.",
     units: [
-      { num: 9,  title: "Clinical Observations",                   duration: "24h", questions: 5  },
-      { num: 10, title: "Chronic Disease Care",                    duration: "28h", questions: 5  },
-      { num: 11, title: "Wound & Skin Care",                       duration: "20h", questions: 5  },
-      { num: 12, title: "Medication Assistance",                   duration: "18h", questions: 5  },
-      { num: 13, title: "Mental Health & Cognitive Care",          duration: "24h", questions: 5  },
-      { num: 14, title: "Palliative & End-of-Life Care",           duration: "22h", questions: 5  },
-      { num: 15, title: "Pediatric & Family Support",             duration: "18h", questions: 5  },
-      { num: 16, title: "Rehabilitation Support",                  duration: "20h", questions: 5  },
-      { num: 17, title: "Therapeutic Nutrition",                   duration: "20h", questions: 5  },
-      { num: 18, title: "Documentation & Reporting",               duration: "16h", questions: 5  },
+      { num: 9,  displayNum: 1,  title: "Clinical Observations",                   duration: "24h", questions: 5  },
+      { num: 10, displayNum: 2, title: "Chronic Disease Care",                    duration: "28h", questions: 5  },
+      { num: 11, displayNum: 3, title: "Wound & Skin Care",                       duration: "20h", questions: 5  },
+      { num: 12, displayNum: 4, title: "Medication Assistance",                   duration: "18h", questions: 5  },
+      { num: 13, displayNum: 5, title: "Mental Health & Cognitive Care",          duration: "24h", questions: 5  },
+      { num: 14, displayNum: 6, title: "Palliative & End-of-Life Care",           duration: "22h", questions: 5  },
+      { num: 15, displayNum: 7, title: "Pediatric & Family Support",             duration: "18h", questions: 5  },
+      { num: 16, displayNum: 8, title: "Rehabilitation Support",                  duration: "20h", questions: 5  },
+      { num: 17, displayNum: 9, title: "Therapeutic Nutrition",                   duration: "20h", questions: 5  },
+      { num: 18, displayNum: 10, title: "Documentation & Reporting",               duration: "16h", questions: 5  },
     ]
   },
   {
@@ -522,15 +522,15 @@ export const CURRICULUM_STRUCTURE = [
     hours: "70",
     desc: "Master leadership, complex clinical situations, specialty care, and advocate for clients at the highest level.",
     units: [
-      { num: 19, title: "Complex Medical Conditions",              duration: "28h", questions: 5  },
-      { num: 20, title: "Delegated Medical Acts",                  duration: "24h", questions: 5  },
-      { num: 21, title: "Gerontology & Aging",                     duration: "24h", questions: 5  },
-      { num: 22, title: "Behavioural Support",                     duration: "26h", questions: 5  },
-      { num: 23, title: "Community & Home Care",                   duration: "26h", questions: 5  },
-      { num: 24, title: "Indigenous Cultural Safety",              duration: "22h", questions: 5  },
-      { num: 25, title: "Emergency Preparedness",                  duration: "22h", questions: 5  },
-      { num: 26, title: "Leadership & Advocacy",                   duration: "20h", questions: 5  },
-      { num: 27, title: "Capstone Clinical Practicum",             duration: "48h", questions: 10 },
+      { num: 19, displayNum: 1, title: "Complex Medical Conditions",              duration: "28h", questions: 5  },
+      { num: 20, displayNum: 2, title: "Delegated Medical Acts",                  duration: "24h", questions: 5  },
+      { num: 21, displayNum: 3, title: "Gerontology & Aging",                     duration: "24h", questions: 5  },
+      { num: 22, displayNum: 4, title: "Behavioural Support",                     duration: "26h", questions: 5  },
+      { num: 23, displayNum: 5, title: "Community & Home Care",                   duration: "26h", questions: 5  },
+      { num: 24, displayNum: 6, title: "Indigenous Cultural Safety",              duration: "22h", questions: 5  },
+      { num: 25, displayNum: 7, title: "Emergency Preparedness",                  duration: "22h", questions: 5  },
+      { num: 26, displayNum: 8, title: "Leadership & Advocacy",                   duration: "20h", questions: 5  },
+      { num: 27, displayNum: 9, title: "Capstone Clinical Practicum",             duration: "48h", questions: 10 },
     ]
   }
 ]

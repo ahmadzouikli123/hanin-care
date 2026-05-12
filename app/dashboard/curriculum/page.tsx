@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 import { useState, useEffect, Suspense } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
@@ -296,7 +296,7 @@ function CurriculumContent() {
                         fontWeight:700, fontSize: isDone ? "1.5rem" : "1.1rem",
                         transition:"all 0.3s",
                       }}>
-                        {isLocked ? "🔒" : isDone ? "✔" : unit.num}
+                        {isLocked ? "🔒" : isDone ? "✔" : (unit.displayNum ?? unit.num)}
                       </div>
 
                       <div style={{ flex:1 }}>
