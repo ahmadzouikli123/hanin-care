@@ -1,4 +1,5 @@
 "use client"
+import { Suspense } from "react"
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
@@ -12,12 +13,12 @@ const PLAN_ACCESS: Record<string, string[]> = {
 }
 
 const PLAN_LABELS: Record<string, { icon: string; label: string; color: string }> = {
-  beginner: { icon:"🌱", label:"Beginner Plan",  color:"var(--beg)" },
-  standard: { icon:"📈", label:"Standard Plan",  color:"var(--int)" },
-  advanced: { icon:"🏆", label:"Advanced Plan",  color:"var(--adv)" },
+  beginner: { icon:"ðŸŒ±", label:"Beginner Plan",  color:"var(--beg)" },
+  standard: { icon:"ðŸ“ˆ", label:"Standard Plan",  color:"var(--int)" },
+  advanced: { icon:"ðŸ†", label:"Advanced Plan",  color:"var(--adv)" },
 }
 
-export default function CurriculumPage() {
+function CurriculumContent() {
   const [openUnit, setOpenUnit]       = useState<string|null>(null)
   const [plan, setPlan]               = useState<string>("beginner")
   const [loading, setLoading]         = useState(true)
@@ -50,7 +51,7 @@ export default function CurriculumPage() {
         .eq("user_id", uid)
         .eq("is_completed", true)
 
-      // Get unit IDs → unit numbers mapping
+      // Get unit IDs â†’ unit numbers mapping
       const { data: units } = await supabase
         .from("units").select("id, unit_number")
 
@@ -100,8 +101,8 @@ export default function CurriculumPage() {
   if (loading) return (
     <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"var(--bg)" }}>
       <div style={{ textAlign:"center", color:"var(--text-light)" }}>
-        <div style={{ fontSize:"2rem", marginBottom:"1rem" }}>⏳</div>
-        <p>Loading your curriculum…</p>
+        <div style={{ fontSize:"2rem", marginBottom:"1rem" }}>â³</div>
+        <p>Loading your curriculumâ€¦</p>
       </div>
     </div>
   )
@@ -115,7 +116,7 @@ export default function CurriculumPage() {
         <div style={{ maxWidth:1400, margin:"0 auto", position:"relative", zIndex:1 }}>
           <div style={{ display:"flex", alignItems:"center", gap:"0.5rem", fontSize:"0.82rem", opacity:0.7, marginBottom:"1rem" }}>
             <Link href="/dashboard" style={{ color:"white", textDecoration:"none" }}>Dashboard</Link>
-            <span>›</span><span>Curriculum</span>
+            <span>â€º</span><span>Curriculum</span>
           </div>
           <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", flexWrap:"wrap", gap:"1.5rem" }}>
             <div>
@@ -123,14 +124,14 @@ export default function CurriculumPage() {
                 PSW Training <span style={{ color:"var(--accent-green)" }}>Curriculum</span>
               </h1>
               <p style={{ opacity:0.85, maxWidth:600, lineHeight:1.8, marginBottom:"1.5rem" }}>
-                27 units across 3 levels — aligned with Canadian PSW standards (Ontario, BC, Alberta).
+                27 units across 3 levels â€” aligned with Canadian PSW standards (Ontario, BC, Alberta).
               </p>
               <div style={{ display:"flex", gap:"1rem", flexWrap:"wrap" }}>
                 {[
-                  { icon:"📚", text:"27 Units" },
-                  { icon:"⏱️", text:"250+ Hours" },
-                  { icon:"✅", text:`${totalCompleted}/${totalAccessible} Completed` },
-                  { icon:"🇨🇦", text:"Canadian Standards" },
+                  { icon:"ðŸ“š", text:"27 Units" },
+                  { icon:"â±ï¸", text:"250+ Hours" },
+                  { icon:"âœ…", text:`${totalCompleted}/${totalAccessible} Completed` },
+                  { icon:"ðŸ‡¨ðŸ‡¦", text:"Canadian Standards" },
                 ].map(({ icon, text }) => (
                   <div key={text} style={{ display:"inline-flex", alignItems:"center", gap:"0.5rem", background:"rgba(255,255,255,0.12)", border:"1px solid rgba(255,255,255,0.2)", padding:"0.4rem 1rem", borderRadius:20, fontSize:"0.85rem" }}>
                     {icon} {text}
@@ -147,7 +148,7 @@ export default function CurriculumPage() {
                 {accessible.length === 1 ? "Level 1 access" : accessible.length === 2 ? "Level 1 & 2 access" : "Full access"}
               </div>
               <Link href="/dashboard" style={{ display:"inline-block", marginTop:"0.75rem", background:"rgba(255,255,255,0.2)", color:"white", padding:"0.35rem 0.9rem", borderRadius:8, fontSize:"0.78rem", fontWeight:600, textDecoration:"none" }}>
-                Upgrade ↗
+                Upgrade â†—
               </Link>
             </div>
           </div>
@@ -179,7 +180,7 @@ export default function CurriculumPage() {
               <div style={{ background: isLocked ? "#F1F5F9" : lv.headerBg, border:`2px solid ${isLocked ? "#CBD5E1" : lv.border}`, borderRadius:20, padding:"2.5rem", marginBottom:"2rem", position:"relative" }}>
                 {isLocked && (
                   <div style={{ position:"absolute", top:20, right:20, background:"#64748B", color:"white", borderRadius:10, padding:"0.4rem 1rem", fontSize:"0.8rem", fontWeight:700 }}>
-                    🔒 Locked
+                    ðŸ”’ Locked
                   </div>
                 )}
                 <div style={{ display:"inline-flex", alignItems:"center", gap:"0.5rem", background: isLocked ? "#94A3B8" : lv.color, color:"white", borderRadius:20, padding:"0.4rem 1rem", fontSize:"0.82rem", fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:"1rem" }}>
@@ -189,7 +190,7 @@ export default function CurriculumPage() {
                 <p style={{ color: isLocked ? "#94A3B8" : "var(--text-light)", maxWidth:700, lineHeight:1.8 }}>{lv.desc}</p>
                 {isLocked && (
                   <div style={{ marginTop:"1.25rem", background:"white", borderRadius:12, padding:"1rem 1.25rem", display:"inline-flex", alignItems:"center", gap:"0.75rem", border:"1px solid #CBD5E1" }}>
-                    <span style={{ fontSize:"1.2rem" }}>🔒</span>
+                    <span style={{ fontSize:"1.2rem" }}>ðŸ”’</span>
                     <div>
                       <div style={{ fontWeight:700, fontSize:"0.88rem", color:"#475569" }}>This level requires a higher plan</div>
                       <div style={{ fontSize:"0.78rem", color:"#94A3B8" }}>
@@ -200,19 +201,19 @@ export default function CurriculumPage() {
                 )}
                 <div style={{ display:"flex", gap:"2rem", marginTop:"1.5rem", flexWrap:"wrap", alignItems:"center" }}>
                   <span style={{ display:"flex", alignItems:"center", gap:"0.5rem", fontSize:"0.88rem", fontWeight:600, color: isLocked ? "#94A3B8" : lv.color }}>
-                    📖 {lv.units.length} Units
+                    ðŸ“– {lv.units.length} Units
                   </span>
                   <span style={{ display:"flex", alignItems:"center", gap:"0.5rem", fontSize:"0.88rem", fontWeight:600, color: isLocked ? "#94A3B8" : lv.color }}>
-                    ⏱️ {lv.hours} Hours
+                    â±ï¸ {lv.hours} Hours
                     {!isLocked && lvCompleted >= lv.units.length && (
   <Link href={`/dashboard/exam/${lv.level}`} style={{ display:"inline-flex", alignItems:"center", gap:"0.5rem", background:"#15803D", color:"white", padding:"0.4rem 1rem", borderRadius:20, fontSize:"0.82rem", fontWeight:700, textDecoration:"none" }}>
-    🎓 Take Level Exam
+    ðŸŽ“ Take Level Exam
   </Link>
 )}
                   </span>
                   {!isLocked && (
                     <span style={{ display:"flex", alignItems:"center", gap:"0.5rem", fontSize:"0.88rem", fontWeight:700, color:"#15803D", background:"#DCFCE7", padding:"0.25rem 0.75rem", borderRadius:20 }}>
-                      ✅ {lvCompleted}/{lv.units.length} completed
+                      âœ… {lvCompleted}/{lv.units.length} completed
                     </span>
                   )}
                 </div>
@@ -253,7 +254,7 @@ export default function CurriculumPage() {
                         fontWeight:700, fontSize: isDone ? "1.5rem" : "1.1rem",
                         transition:"all 0.3s",
                       }}>
-                        {isLocked ? "🔒" : isDone ? "✓" : unit.num}
+                        {isLocked ? "ðŸ”’" : isDone ? "âœ“" : unit.num}
                       </div>
 
                       <div style={{ flex:1 }}>
@@ -263,13 +264,13 @@ export default function CurriculumPage() {
                           </h3>
                           {isDone && (
                             <span style={{ background:"#DCFCE7", color:"#15803D", padding:"0.15rem 0.6rem", borderRadius:20, fontSize:"0.72rem", fontWeight:700 }}>
-                              ✅ Completed
+                              âœ… Completed
                             </span>
                           )}
                         </div>
                         <div style={{ display:"flex", gap:"1rem", fontSize:"0.8rem", color:"var(--text-light)" }}>
-                          <span>⏱️ {unit.duration}</span>
-                          <span>❓ {unit.questions} questions</span>
+                          <span>â±ï¸ {unit.duration}</span>
+                          <span>â“ {unit.questions} questions</span>
                           <span style={{ background: isLocked ? "#F1F5F9" : isDone ? "#DCFCE7" : lv.bg, color: isLocked ? "#94A3B8" : isDone ? "#15803D" : lv.color, padding:"0.15rem 0.6rem", borderRadius:6, fontWeight:600 }}>
                             {lv.label}
                           </span>
@@ -277,8 +278,8 @@ export default function CurriculumPage() {
                       </div>
 
                       {isLocked
-                        ? <span style={{ color:"#CBD5E1", fontSize:"1.2rem" }}>🔒</span>
-                        : <span style={{ color: isDone ? "#22C55E" : "var(--text-light)", transform:isOpen?"rotate(180deg)":"rotate(0)", transition:"transform 0.3s", fontSize:"1.2rem" }}>▾</span>
+                        ? <span style={{ color:"#CBD5E1", fontSize:"1.2rem" }}>ðŸ”’</span>
+                        : <span style={{ color: isDone ? "#22C55E" : "var(--text-light)", transform:isOpen?"rotate(180deg)":"rotate(0)", transition:"transform 0.3s", fontSize:"1.2rem" }}>â–¾</span>
                       }
                     </div>
 
@@ -290,10 +291,10 @@ export default function CurriculumPage() {
                         </p>
                         <div style={{ display:"flex", gap:"1rem", flexWrap:"wrap", alignItems:"center" }}>
                           <Link href={`/dashboard/unit/${unit.num}`} style={{ background:lv.color, color:"white", padding:"0.7rem 1.5rem", borderRadius:10, fontWeight:600, fontSize:"0.9rem", textDecoration:"none" }}>
-                            📖 Study Unit {unit.num} →
+                            ðŸ“– Study Unit {unit.num} â†’
                           </Link>
                           <Link href={`/dashboard/unit/${unit.num}`} style={{ background:lv.bg, color:lv.color, padding:"0.7rem 1.5rem", borderRadius:10, fontWeight:600, fontSize:"0.9rem", textDecoration:"none" }}>
-                            🧠 Take Quiz →
+                            ðŸ§  Take Quiz â†’
                           </Link>
 
                           {/* Mark as Complete button */}
@@ -317,11 +318,11 @@ export default function CurriculumPage() {
                                 gap:"0.5rem",
                               }}
                             >
-                              {isMarking ? "⏳ Saving…" : "✅ Mark as Complete"}
+                              {isMarking ? "â³ Savingâ€¦" : "âœ… Mark as Complete"}
                             </button>
                           ) : (
                             <div style={{ display:"flex", alignItems:"center", gap:"0.5rem", color:"#15803D", fontWeight:700, fontSize:"0.9rem" }}>
-                              ✅ Unit Completed!
+                              âœ… Unit Completed!
                             </div>
                           )}
                         </div>
@@ -336,8 +337,16 @@ export default function CurriculumPage() {
       </div>
 
       <footer style={{ background:"var(--text)", color:"white", padding:"2rem", textAlign:"center" }}>
-        <p style={{ opacity:0.5, fontSize:"0.85rem" }}>© 2024 Elder Support Training PSW · PSW Training Platform</p>
+        <p style={{ opacity:0.5, fontSize:"0.85rem" }}>Â© 2024 Elder Support Training PSW Â· PSW Training Platform</p>
       </footer>
     </div>
+  )
+}
+
+export default function CurriculumPage() {
+  return (
+    <Suspense fallback={<div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center"}}><p>Loading...</p></div>}>
+      <CurriculumContent />
+    </Suspense>
   )
 }
