@@ -260,6 +260,9 @@ function CurriculumContent() {
                   {!isLocked && (
                     <span style={{ display:"flex", alignItems:"center", gap:"0.5rem", fontSize:"0.88rem", fontWeight:700, color:"#15803D", background:"#DCFCE7", padding:"0.25rem 0.75rem", borderRadius:20 }}>
                       ✅ {lvCompleted}/{lv.units.length} completed
+              <a href={`/dashboard/cases/${lv.level}`} style={{display:"inline-flex",alignItems:"center",gap:"0.5rem",background:"var(--primary)",color:"white",padding:"0.4rem 1rem",borderRadius:20,fontSize:"0.82rem",fontWeight:700,textDecoration:"none",marginLeft:"0.5rem"}}>
+                📋 Case Studies
+              </a>
                     </span>
                   )}
                 </div>
