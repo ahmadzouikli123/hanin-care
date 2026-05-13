@@ -1,9 +1,10 @@
-"use client"
+﻿"use client"
 import { createClient } from "@/lib/supabase/client"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { UNITS } from "@/lib/curriculum-data"
+import UnitVideo from "@/components/UnitVideo"
 import { UNITS_4_27 } from "@/lib/units-4-27"
 
 const ALL_UNITS = [...UNITS, ...UNITS_4_27]
@@ -380,6 +381,7 @@ export default function UnitPage() {
         {/* ── THEORY TAB ── */}
         {tab === "theory" && (
           <div>
+            <UnitVideo unitId={unitId} levelColor={lc.color} />
             {unit.theory.map((block, i) => (
               <div key={i} style={{ marginBottom: "2rem" }}>
                 {block.type === "heading" && (
