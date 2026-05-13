@@ -31,6 +31,34 @@ interface QuizQ {
   exp: string
 }
 
+// ─── Case Study Types ─────────────────────────────────────────────────────────
+interface DBCaseStudy {
+  id: string
+  order_index: number
+  icon: string
+  title: string
+  subtitle: string
+  scenario: string
+  difficulty: "beginner" | "intermediate" | "advanced"
+  profile: { label: string; value: string }[]
+  case_study_questions: {
+    id: string
+    order_index: number
+    question_text: string
+    correct_letter: string
+    explanation: string
+    case_study_options: {
+      letter: string
+      option_text: string
+      order_index: number
+    }[]
+  }[]
+  case_study_reflections: {
+    order_index: number
+    reflection_text: string
+  }[]
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const LETTERS = ["A", "B", "C", "D", "E"]
 
@@ -63,6 +91,11 @@ export default function UnitPage() {
   const [quizQuestions, setQuizQuestions] = useState<QuizQ[]>([])
   const [quizLoading, setQuizLoading] = useState(true)
   const [quizError, setQuizError] = useState<string | null>(null)
+
+  // ── Case Studies from Supabase ──
+  const [caseStudies, setCaseStudies] = useState<DBCaseStudy[]>([])
+  const [caseLoading, setCaseLoading] = useState(true)
+  const [activeCaseIdx, setActiveCaseIdx] = useState(0)
 
   // ── Auth ──
   useEffect(() => {
@@ -135,6 +168,41 @@ export default function UnitPage() {
     }
 
     fetchQuiz()
+  }, [unitId])
+
+  // ── Fetch case studies from Supabase ──
+  useEffect(() => {
+    if (!unitId) return
+    const fetchCases = async () => {
+      setCaseLoading(true)
+      try {
+        const supabase = createClient()
+        const { data: unitRow } = await supabase
+          .from("units").select("id").eq("unit_number", unitId).single()
+        if (!unitRow) throw new Error("Unit not found")
+
+        const { data: cases, error } = await supabase
+          .from("case_studies")
+          .select(`
+            id, order_index, icon, title, subtitle, scenario, difficulty, profile,
+            case_study_questions (
+              id, order_index, question_text, correct_letter, explanation,
+              case_study_options ( letter, option_text, order_index )
+            ),
+            case_study_reflections ( order_index, reflection_text )
+          `)
+          .eq("unit_id", unitRow.id)
+          .order("order_index")
+
+        if (error) throw error
+        if (cases) setCaseStudies(cases as DBCaseStudy[])
+      } catch (err) {
+        console.error("Failed to load case studies:", err)
+      } finally {
+        setCaseLoading(false)
+      }
+    }
+    fetchCases()
   }, [unitId])
 
   if (!unit)
@@ -303,7 +371,7 @@ export default function UnitPage() {
             "quiz",
             `🧠 Quiz (${quizLoading ? "..." : activeQuiz.length})`
           )}
-          {unit.caseStudy && tabBtn("case", "📋 Case Study")}
+          {(caseStudies.length > 0 || unit.caseStudy) && tabBtn("case", `📋 Case Study (${caseStudies.length || 1})`)}
         </div>
       </div>
 
@@ -986,162 +1054,86 @@ export default function UnitPage() {
         )}
 
         {/* ── CASE STUDY TAB ── */}
-        {tab === "case" && unit.caseStudy && (
+        {tab === "case" && (
           <div>
-            <div
-              style={{
-                background: "white",
-                borderRadius: 18,
-                border: "1px solid var(--border)",
-                boxShadow: "var(--shadow)",
-                overflow: "hidden",
-              }}
-            >
-              <div
-                style={{
-                  background: `linear-gradient(135deg,var(--primary-dark),var(--primary))`,
-                  color: "white",
-                  padding: "1.5rem 2rem",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "1.25rem",
-                }}
-              >
-                <div style={{ fontSize: "2.5rem" }}>{unit.caseStudy.icon}</div>
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: "1.1rem", marginBottom: "0.2rem" }}>
-                    {unit.caseStudy.title}
-                  </h3>
-                  <p style={{ opacity: 0.8, fontSize: "0.85rem" }}>
-                    {unit.caseStudy.subtitle}
-                  </p>
-                </div>
-                <span
-                  style={{
-                    background: "rgba(255,255,255,0.2)",
-                    border: "1px solid rgba(255,255,255,0.3)",
-                    padding: "0.35rem 0.9rem",
-                    borderRadius: 20,
-                    fontSize: "0.78rem",
-                    fontWeight: 700,
-                  }}
-                >
-                  {unit.level.charAt(0).toUpperCase() + unit.level.slice(1)} · Unit {unit.id}
-                </span>
+            {caseLoading ? (
+              <div style={{ textAlign:"center", padding:"3rem", color:"var(--text-light)" }}>
+                <div style={{ fontSize:"2rem", marginBottom:"1rem" }}>⏳</div>
+                <p>Loading case studies...</p>
               </div>
-              <div style={{ padding: "2rem" }}>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit,minmax(130px,1fr))",
-                    gap: "0.85rem",
-                    background: "var(--bg)",
-                    borderRadius: 12,
-                    padding: "1.25rem",
-                    marginBottom: "1.5rem",
-                  }}
-                >
-                  {unit.caseStudy.profile.map((p: any, i: number) => (
-                    <div key={i}>
-                      <div
-                        style={{
-                          fontSize: "0.72rem",
-                          fontWeight: 700,
-                          color: "var(--text-light)",
-                          textTransform: "uppercase",
-                          letterSpacing: 0.5,
-                          marginBottom: "0.2rem",
-                        }}
-                      >
-                        {p.label}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "0.92rem",
-                          fontWeight: 600,
-                          color: "var(--text)",
-                        }}
-                      >
-                        {p.value}
+            ) : caseStudies.length === 0 && !unit.caseStudy ? (
+              <div style={{ textAlign:"center", padding:"3rem", color:"var(--text-light)" }}>
+                <div style={{ fontSize:"2rem", marginBottom:"1rem" }}>📭</div>
+                <p>No case studies found for this unit.</p>
+              </div>
+            ) : (
+              <>
+                {/* Case selector tabs — show if DB has cases */}
+                {caseStudies.length > 0 && (
+                  <div style={{ display:"flex", gap:"0.75rem", flexWrap:"wrap", marginBottom:"2rem" }}>
+                    {caseStudies.map((cs, idx) => {
+                      const diffColors: Record<string, any> = {
+                        beginner:     { bg:"var(--beg-bg)", color:"var(--beg)", border:"#A8D9E8" },
+                        intermediate: { bg:"var(--int-bg)", color:"var(--int)", border:"#FCD34D" },
+                        advanced:     { bg:"var(--adv-bg)", color:"var(--adv)", border:"#C4B5FD" },
+                      }
+                      const dc = diffColors[cs.difficulty] || diffColors.beginner
+                      return (
+                        <button
+                          key={cs.id}
+                          onClick={() => setActiveCaseIdx(idx)}
+                          style={{
+                            padding:"0.5rem 1.1rem",
+                            borderRadius:20,
+                            border:`2px solid ${activeCaseIdx === idx ? dc.border : "var(--border)"}`,
+                            background: activeCaseIdx === idx ? dc.bg : "white",
+                            color: activeCaseIdx === idx ? dc.color : "var(--text-light)",
+                            fontWeight:700,
+                            fontSize:"0.82rem",
+                            cursor:"pointer",
+                            fontFamily:"inherit",
+                            display:"flex",
+                            alignItems:"center",
+                            gap:"0.4rem",
+                          }}
+                        >
+                          {cs.icon} Case {cs.order_index}
+                          <span style={{ fontSize:"0.72rem", opacity:0.8, textTransform:"capitalize" }}>
+                            · {cs.difficulty}
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+
+                {/* Active case study */}
+                {caseStudies.length > 0 ? (
+                  <DBCaseStudyView cs={caseStudies[activeCaseIdx]} lc={lc} />
+                ) : unit.caseStudy ? (
+                  // Fallback to static data
+                  <div style={{ background:"white", borderRadius:18, border:"1px solid var(--border)", boxShadow:"var(--shadow)", overflow:"hidden" }}>
+                    <div style={{ background:`linear-gradient(135deg,var(--primary-dark),var(--primary))`, color:"white", padding:"1.5rem 2rem", display:"flex", alignItems:"center", gap:"1.25rem" }}>
+                      <div style={{ fontSize:"2.5rem" }}>{unit.caseStudy.icon}</div>
+                      <div style={{ flex:1 }}>
+                        <h3 style={{ fontSize:"1.1rem", marginBottom:"0.2rem" }}>{unit.caseStudy.title}</h3>
+                        <p style={{ opacity:0.8, fontSize:"0.85rem" }}>{unit.caseStudy.subtitle}</p>
                       </div>
                     </div>
-                  ))}
-                </div>
-                <div
-                  style={{
-                    background: "#EFF6FF",
-                    borderLeft: "4px solid var(--primary)",
-                    borderRadius: "0 12px 12px 0",
-                    padding: "1.25rem 1.5rem",
-                    marginBottom: "1.5rem",
-                  }}
-                >
-                  <h4
-                    style={{
-                      fontSize: "0.9rem",
-                      fontWeight: 700,
-                      color: "var(--primary)",
-                      marginBottom: "0.75rem",
-                    }}
-                  >
-                    📋 Scenario
-                  </h4>
-                  <p
-                    style={{
-                      fontSize: "0.92rem",
-                      lineHeight: 1.8,
-                      color: "var(--text)",
-                    }}
-                  >
-                    {unit.caseStudy.scenario}
-                  </p>
-                </div>
-                <h4 style={{ fontWeight: 700, marginBottom: "1rem", color: "var(--text)" }}>
-                  Case Questions
-                </h4>
-                {unit.caseStudy.questions.map((cq: any, i: number) => (
-                  <CaseQuestion key={i} cq={cq} idx={i} lc={lc} />
-                ))}
-                <div
-                  style={{
-                    background: "#FFFBEB",
-                    border: "1.5px solid #FCD34D",
-                    borderRadius: 12,
-                    padding: "1.25rem 1.5rem",
-                    marginTop: "1.5rem",
-                  }}
-                >
-                  <h4
-                    style={{
-                      fontWeight: 700,
-                      color: "#D97706",
-                      fontSize: "0.9rem",
-                      marginBottom: "0.75rem",
-                    }}
-                  >
-                    💡 Clinical Reflection Points
-                  </h4>
-                  <ul style={{ listStyle: "none" }}>
-                    {unit.caseStudy.reflections.map((r: string, i: number) => (
-                      <li
-                        key={i}
-                        style={{
-                          fontSize: "0.88rem",
-                          lineHeight: 1.7,
-                          paddingLeft: "1.5rem",
-                          position: "relative",
-                          color: "var(--text)",
-                          marginBottom: "0.35rem",
-                        }}
-                      >
-                        <span style={{ position: "absolute", left: 0 }}>💡</span>
-                        {r}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
+                    <div style={{ padding:"2rem" }}>
+                      <div style={{ background:"#EFF6FF", borderLeft:"4px solid var(--primary)", borderRadius:"0 12px 12px 0", padding:"1.25rem 1.5rem", marginBottom:"1.5rem" }}>
+                        <h4 style={{ fontSize:"0.9rem", fontWeight:700, color:"var(--primary)", marginBottom:"0.75rem" }}>📋 Scenario</h4>
+                        <p style={{ fontSize:"0.92rem", lineHeight:1.8, color:"var(--text)" }}>{unit.caseStudy.scenario}</p>
+                      </div>
+                      <h4 style={{ fontWeight:700, marginBottom:"1rem" }}>Case Questions</h4>
+                      {unit.caseStudy.questions.map((cq: any, i: number) => (
+                        <CaseQuestion key={i} cq={cq} idx={i} lc={lc} />
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </>
+            )}
           </div>
         )}
       </div>
@@ -1149,7 +1141,81 @@ export default function UnitPage() {
   )
 }
 
-// ─── Case Question Sub-Component ─────────────────────────────────────────────
+// ─── DB Case Study View Component ────────────────────────────────────────────
+function DBCaseStudyView({ cs, lc }: { cs: DBCaseStudy; lc: any }) {
+  const diffColors: Record<string, any> = {
+    beginner:     { bg:"var(--beg-bg)", color:"var(--beg)" },
+    intermediate: { bg:"var(--int-bg)", color:"var(--int)" },
+    advanced:     { bg:"var(--adv-bg)", color:"var(--adv)" },
+  }
+  const dc = diffColors[cs.difficulty] || diffColors.beginner
+  const sortedQuestions = [...cs.case_study_questions].sort((a,b) => a.order_index - b.order_index)
+  const sortedReflections = [...cs.case_study_reflections].sort((a,b) => a.order_index - b.order_index)
+
+  return (
+    <div style={{ background:"white", borderRadius:18, border:"1px solid var(--border)", boxShadow:"var(--shadow)", overflow:"hidden" }}>
+      {/* Header */}
+      <div style={{ background:`linear-gradient(135deg,var(--primary-dark),var(--primary))`, color:"white", padding:"1.5rem 2rem", display:"flex", alignItems:"center", gap:"1.25rem" }}>
+        <div style={{ fontSize:"2.5rem" }}>{cs.icon}</div>
+        <div style={{ flex:1 }}>
+          <h3 style={{ fontSize:"1.1rem", marginBottom:"0.2rem" }}>{cs.title}</h3>
+          <p style={{ opacity:0.8, fontSize:"0.85rem" }}>{cs.subtitle}</p>
+        </div>
+        <span style={{ background:"rgba(255,255,255,0.2)", border:"1px solid rgba(255,255,255,0.3)", padding:"0.35rem 0.9rem", borderRadius:20, fontSize:"0.78rem", fontWeight:700, textTransform:"capitalize" }}>
+          {cs.difficulty}
+        </span>
+      </div>
+
+      <div style={{ padding:"2rem" }}>
+        {/* Profile */}
+        {cs.profile?.length > 0 && (
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))", gap:"0.85rem", background:"var(--bg)", borderRadius:12, padding:"1.25rem", marginBottom:"1.5rem" }}>
+            {cs.profile.map((p, i) => (
+              <div key={i}>
+                <div style={{ fontSize:"0.72rem", fontWeight:700, color:"var(--text-light)", textTransform:"uppercase", letterSpacing:0.5, marginBottom:"0.2rem" }}>{p.label}</div>
+                <div style={{ fontSize:"0.92rem", fontWeight:600, color:"var(--text)" }}>{p.value}</div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Scenario */}
+        <div style={{ background:"#EFF6FF", borderLeft:"4px solid var(--primary)", borderRadius:"0 12px 12px 0", padding:"1.25rem 1.5rem", marginBottom:"1.5rem" }}>
+          <h4 style={{ fontSize:"0.9rem", fontWeight:700, color:"var(--primary)", marginBottom:"0.75rem" }}>📋 Scenario</h4>
+          <p style={{ fontSize:"0.92rem", lineHeight:1.8, color:"var(--text)" }}>{cs.scenario}</p>
+        </div>
+
+        {/* Questions */}
+        <h4 style={{ fontWeight:700, marginBottom:"1rem", color:"var(--text)" }}>Case Questions</h4>
+        {sortedQuestions.map((q, i) => {
+          const opts = [...q.case_study_options].sort((a,b) => a.order_index - b.order_index)
+          const cq = {
+            q: q.question_text,
+            correct: q.correct_letter,
+            exp: q.explanation,
+            options: opts.map(o => ({ l: o.letter, t: o.option_text }))
+          }
+          return <CaseQuestion key={q.id} cq={cq} idx={i} lc={lc} />
+        })}
+
+        {/* Reflections */}
+        {sortedReflections.length > 0 && (
+          <div style={{ background:"#FFFBEB", border:"1.5px solid #FCD34D", borderRadius:12, padding:"1.25rem 1.5rem", marginTop:"1.5rem" }}>
+            <h4 style={{ fontWeight:700, color:"#D97706", fontSize:"0.9rem", marginBottom:"0.75rem" }}>💡 Clinical Reflection Points</h4>
+            <ul style={{ listStyle:"none" }}>
+              {sortedReflections.map((r, i) => (
+                <li key={i} style={{ fontSize:"0.88rem", lineHeight:1.7, paddingLeft:"1.5rem", position:"relative", color:"var(--text)", marginBottom:"0.35rem" }}>
+                  <span style={{ position:"absolute", left:0 }}>💡</span>
+                  {r.reflection_text}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
 function CaseQuestion({ cq, idx, lc }: { cq: any; idx: number; lc: any }) {
   const [selected, setSelected] = useState<string | null>(null)
   return (
