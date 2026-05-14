@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 import { createClient } from "@/lib/supabase/client"
 import { useState, useEffect } from "react"
 import Link from "next/link"
@@ -30,6 +30,20 @@ interface QuizQ {
   options: { l: string; t: string }[]
   correct: string
   exp: string
+}
+
+// ─── Theory Block Types ───────────────────────────────────────────────────────
+interface DBTheoryBlock {
+  id: string
+  order_index: number
+  type: "heading" | "paragraph" | "list" | "infobox" | "table" | "badges" | "practical"
+  content?: string
+  title?: string
+  variant?: "blue" | "green" | "red" | "amber" | "purple"
+  items?: string[]
+  headers?: string[]
+  rows?: string[][]
+  steps?: { title: string; desc: string; tag: string }[]
 }
 
 // ─── Case Study Types ─────────────────────────────────────────────────────────
@@ -88,6 +102,10 @@ export default function UnitPage() {
   const [shown, setShown] = useState<Record<number, boolean>>({})
   const [finished, setFinished] = useState(false)
 
+  // ── Theory from Supabase ──
+  const [dbTheory, setDbTheory] = useState<DBTheoryBlock[]>([])
+  const [theoryLoading, setTheoryLoading] = useState(true)
+
   // ── Quiz from Supabase ──
   const [quizQuestions, setQuizQuestions] = useState<QuizQ[]>([])
   const [quizLoading, setQuizLoading] = useState(true)
@@ -106,6 +124,35 @@ export default function UnitPage() {
         if (data.user) setUserId(data.user.id)
       })
   }, [])
+
+  // ── Fetch theory from Supabase ──
+  useEffect(() => {
+    if (!unitId) return
+    const fetchTheory = async () => {
+      setTheoryLoading(true)
+      try {
+        const supabase = createClient()
+        const { data: unitRow } = await supabase
+          .from("units").select("id").eq("unit_number", unitId).single()
+        if (!unitRow) throw new Error("Unit not found")
+
+        const { data: blocks, error } = await supabase
+          .from("unit_theory_blocks")
+          .select("*")
+          .eq("unit_id", unitRow.id)
+          .order("order_index")
+
+        if (!error && blocks && blocks.length > 0) {
+          setDbTheory(blocks as DBTheoryBlock[])
+        }
+      } catch (err) {
+        console.error("Failed to load theory:", err)
+      } finally {
+        setTheoryLoading(false)
+      }
+    }
+    fetchTheory()
+  }, [unitId])
 
   // ── Fetch quiz from Supabase ──
   useEffect(() => {
@@ -382,7 +429,13 @@ export default function UnitPage() {
         {tab === "theory" && (
           <div>
             <UnitVideo unitId={unitId} levelColor={lc.color} />
-            {unit.theory.map((block, i) => (
+            {theoryLoading ? (
+              <div style={{ textAlign:"center", padding:"2rem", color:"var(--text-light)" }}>
+                <div style={{ fontSize:"1.5rem", marginBottom:"0.5rem" }}>⏳</div>
+                <p style={{ fontSize:"0.9rem" }}>Loading theory content…</p>
+              </div>
+            ) : null}
+            {!theoryLoading && (dbTheory.length > 0 ? dbTheory : unit.theory).map((block: any, i: number) => (
               <div key={i} style={{ marginBottom: "2rem" }}>
                 {block.type === "heading" && (
                   <h3
