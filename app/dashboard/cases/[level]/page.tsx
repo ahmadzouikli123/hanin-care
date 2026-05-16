@@ -318,10 +318,17 @@ function CasesContent() {
                 style={{ border: `2px solid ${lc.color}`, color: lc.color, padding: "0.75rem 1.5rem", borderRadius: 10, fontWeight: 600, textDecoration: "none", display: "inline-block" }}>
                 ← Back to Curriculum
               </Link>
-              <button onClick={() => setActiveIdx(i => Math.min(cases.length - 1, i + 1))} disabled={activeIdx === cases.length - 1}
-                style={{ background: activeIdx === cases.length - 1 ? "var(--border)" : lc.color, color: activeIdx === cases.length - 1 ? "var(--text-light)" : "white", padding: "0.75rem 1.5rem", borderRadius: 10, border: "none", fontWeight: 700, cursor: activeIdx === cases.length - 1 ? "default" : "pointer", fontFamily: "inherit" }}>
-                Next Case →
-              </button>
+              {activeIdx === cases.length - 1 ? (
+                <Link href={`/dashboard/curriculum?level=${level}`}
+                  style={{ background: "#22C55E", color: "white", padding: "0.75rem 1.5rem", borderRadius: 10, fontWeight: 700, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
+                  ✅ Complete Level Cases
+                </Link>
+              ) : (
+                <button onClick={() => setActiveIdx(i => i + 1)}
+                  style={{ background: lc.color, color: "white", padding: "0.75rem 1.5rem", borderRadius: 10, border: "none", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
+                  Next Case →
+                </button>
+              )}
             </div>
           </>
         )}
