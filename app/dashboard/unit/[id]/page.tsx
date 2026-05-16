@@ -97,6 +97,10 @@ export default function UnitPage() {
 
   const [userId, setUserId] = useState<string | null>(null)
   const [unitMarked, setUnitMarked] = useState(false)
+  const [theoryViewed, setTheoryViewed]   = useState(false)
+  const [quizPassed, setQuizPassed]       = useState(false)
+  const [caseDone, setCaseDone]           = useState(false)
+  const [progressPct, setProgressPct]     = useState(0)
   const [tab, setTab] = useState<"theory" | "quiz" | "case">("theory")
   const [answers, setAnswers] = useState<Record<number, string>>({})
   const [shown, setShown] = useState<Record<number, boolean>>({})
@@ -262,14 +266,55 @@ export default function UnitPage() {
     )
 
   // ── Actions ──
+  // ── Progress helpers ──────────────────────────────────────────────────────
+  const getUnitDbId = async () => {
+    const supabase = createClient()
+    const { data } = await supabase
+      .from("units").select("id").eq("unit_number", unitId).single()
+    return data?.id ?? null
+  }
+
+  const updateProgress = async (theory: boolean, quiz: boolean, quizScore: number, quizPass: boolean, caseStudy: boolean) => {
+    if (!userId) return
+    const unitDbId = await getUnitDbId()
+    if (!unitDbId) return
+    const pct = Math.round((Number(theory) + Number(quizPass) + Number(caseStudy)) / 3 * 100)
+    setProgressPct(pct)
+    const supabase = createClient()
+    await supabase.from("unit_progress").upsert({
+      user_id:        userId,
+      unit_id:        unitDbId,
+      is_started:     true,
+      theory_viewed:  theory,
+      quiz_completed: quiz,
+      quiz_score:     quizScore,
+      quiz_passed:    quizPass,
+      case_completed: caseStudy,
+      progress_pct:   pct,
+      is_completed:   pct === 100,
+      completed_at:   pct === 100 ? new Date().toISOString() : null,
+      last_accessed:  new Date().toISOString(),
+    }, { onConflict: "user_id,unit_id" })
+    if (pct === 100) setUnitMarked(true)
+  }
+
+  const markTheoryViewed = async () => {
+    if (theoryViewed) return
+    setTheoryViewed(true)
+    await updateProgress(true, quizPassed, finished ? Math.round((score / activeQuiz.length) * 100) : 0, quizPassed, caseDone)
+  }
+
+  const markCaseCompleted = async () => {
+    if (caseDone) return
+    setCaseDone(true)
+    await updateProgress(theoryViewed, quizPassed, finished ? Math.round((score / activeQuiz.length) * 100) : 0, quizPassed, true)
+  }
+
   const markUnitComplete = async () => {
     if (!userId || unitMarked) return
     const supabase = createClient()
     const { data: unitRow } = await supabase
-      .from("units")
-      .select("id")
-      .eq("unit_number", unitId)
-      .single()
+      .from("units").select("id").eq("unit_number", unitId).single()
     if (!unitRow) return
     await supabase.from("unit_progress").upsert(
       {
@@ -423,9 +468,26 @@ export default function UnitPage() {
         </div>
       </div>
 
+      {/* Progress Bar */}
+      <div style={{ background: "white", borderBottom: "1px solid var(--border)", padding: "0.75rem 2rem" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", gap: "1rem" }}>
+          <span style={{ fontSize: "0.8rem", fontWeight: 600, color: "var(--text-light)", whiteSpace: "nowrap" }}>Unit Progress</span>
+          <div style={{ flex: 1, height: 8, background: "var(--border)", borderRadius: 4 }}>
+            <div style={{ width: `${progressPct}%`, height: "100%", background: progressPct === 100 ? "#22C55E" : "var(--primary)", borderRadius: 4, transition: "width 0.5s" }} />
+          </div>
+          <span style={{ fontSize: "0.8rem", fontWeight: 700, color: progressPct === 100 ? "#22C55E" : "var(--primary)", whiteSpace: "nowrap" }}>{progressPct}%</span>
+          <div style={{ display: "flex", gap: "0.4rem" }}>
+            {[{ label: "📘", done: theoryViewed }, { label: "🧠", done: quizPassed }, { label: "📋", done: caseDone }].map(({ label, done }) => (
+              <span key={label} style={{ fontSize: "0.9rem", opacity: done ? 1 : 0.3 }}>{label}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "2.5rem 2rem" }}>
 
         {/* ── THEORY TAB ── */}
+        {tab === "theory" && markTheoryViewed()}
         {tab === "theory" && (
           <div>
             <UnitVideo unitId={unitId} levelColor={lc.color} />
@@ -1109,6 +1171,7 @@ export default function UnitPage() {
         )}
 
         {/* ── CASE STUDY TAB ── */}
+        {tab === "case" && markCaseCompleted()}
         {tab === "case" && (
           <div>
             {caseLoading ? (
