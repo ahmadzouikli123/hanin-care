@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useParams } from "next/navigation"
 import { UNITS } from "@/lib/curriculum-data"
 import UnitVideo from "@/components/UnitVideo"
+import { useUnitTheory, useUnitQuiz, useUnitCaseStudies } from "@/lib/hooks/useUnitData"
 import { UNITS_4_27 } from "@/lib/units-4-27"
 
 const ALL_UNITS = [...UNITS, ...UNITS_4_27]
@@ -106,20 +107,20 @@ export default function UnitPage() {
   const [shown, setShown] = useState<Record<number, boolean>>({})
   const [finished, setFinished] = useState(false)
 
-  // ── Theory from Supabase ──
-  const [dbTheory, setDbTheory] = useState<DBTheoryBlock[]>([])
-  const [theoryLoading, setTheoryLoading] = useState(true)
-  const [theoryError, setTheoryError] = useState<string | null>(null)
+  // ── Theory from Supabase (SWR cached) ──
+  const { data: dbTheoryData, isLoading: theoryLoading, error: theoryErrorRaw } = useUnitTheory(unitId)
+  const dbTheory = (dbTheoryData as DBTheoryBlock[]) ?? []
+  const theoryError = theoryErrorRaw ? (theoryErrorRaw as Error).message : null
 
-  // ── Quiz from Supabase ──
+  // ── Quiz from Supabase (SWR cached) ──
+  const { data: quizRawData, isLoading: quizLoading, error: quizErrorRaw } = useUnitQuiz(unitId)
   const [quizQuestions, setQuizQuestions] = useState<QuizQ[]>([])
-  const [quizLoading, setQuizLoading] = useState(true)
-  const [quizError, setQuizError] = useState<string | null>(null)
+  const quizError = quizErrorRaw ? (quizErrorRaw as Error).message : null
 
-  // ── Case Studies from Supabase ──
-  const [caseStudies, setCaseStudies] = useState<DBCaseStudy[]>([])
-  const [caseLoading, setCaseLoading] = useState(true)
-  const [caseError, setCaseError] = useState<string | null>(null)
+  // ── Case Studies from Supabase (SWR cached) ──
+  const { data: caseStudiesData, isLoading: caseLoading, error: caseErrorRaw } = useUnitCaseStudies(unitId)
+  const caseStudies = (caseStudiesData as DBCaseStudy[]) ?? []
+  const caseError = caseErrorRaw ? (caseErrorRaw as Error).message : null
   const [activeCaseIdx, setActiveCaseIdx] = useState(0)
 
   // ── Auth ──
@@ -131,137 +132,11 @@ export default function UnitPage() {
       })
   }, [])
 
-  // ── Fetch theory from Supabase ──
-  useEffect(() => {
-    if (!unitId) return
-    const fetchTheory = async () => {
-      setTheoryLoading(true)
-      try {
-        const supabase = createClient()
-        const { data: unitRow } = await supabase
-          .from("units").select("id").eq("unit_number", unitId).single()
-        if (!unitRow) throw new Error("Unit not found")
 
-        const { data: blocks, error } = await supabase
-          .from("unit_theory_blocks")
-          .select("*")
-          .eq("unit_id", unitRow.id)
-          .order("order_index")
 
-        if (error) throw new Error("Failed to load theory content")
-        if (blocks && blocks.length > 0) {
-          setDbTheory(blocks as DBTheoryBlock[])
-        }
-      } catch (err: any) {
-        console.error("Failed to load theory:", err)
-        setTheoryError(err.message ?? "Failed to load theory")
-      } finally {
-        setTheoryLoading(false)
-      }
-    }
-    fetchTheory()
-  }, [unitId])
 
-  // ── Fetch quiz from Supabase ──
-  useEffect(() => {
-    if (!unitId) return
-    const fetchQuiz = async () => {
-      setQuizLoading(true)
-      setQuizError(null)
-      try {
-        const supabase = createClient()
 
-        // 1. Get the unit's DB id
-        const { data: unitRow, error: unitErr } = await supabase
-          .from("units")
-          .select("id")
-          .eq("unit_number", unitId)
-          .single()
 
-        if (unitErr || !unitRow) throw new Error("Unit not found in database")
-
-        // 2. Get the unit quiz
-        const { data: quiz, error: quizErr } = await supabase
-          .from("quizzes")
-          .select("id")
-          .eq("unit_id", unitRow.id)
-          .eq("quiz_type", "unit")
-          .single()
-
-        if (quizErr || !quiz) throw new Error("Quiz not found for this unit")
-
-        // 3. Get questions + answer options
-        const { data: questions, error: qErr } = await supabase
-          .from("questions")
-          .select(`
-            id,
-            question_text,
-            difficulty,
-            explanation,
-            order_index,
-            answer_options (
-              id,
-              option_text,
-              is_correct,
-              order_index
-            )
-          `)
-          .eq("quiz_id", quiz.id)
-          .order("order_index")
-
-        if (qErr) throw new Error("Failed to load questions")
-
-        setQuizQuestions((questions as DBQuestion[]).map(dbToQuiz))
-      } catch (err: any) {
-        setQuizError(err.message ?? "Failed to load quiz")
-        // Fallback to static data if available
-        if (unit?.quiz?.length) {
-          setQuizQuestions(unit.quiz as QuizQ[])
-        }
-      } finally {
-        setQuizLoading(false)
-      }
-    }
-
-    fetchQuiz()
-  }, [unitId])
-
-  // ── Fetch case studies from Supabase ──
-  useEffect(() => {
-    if (!unitId) return
-    const fetchCases = async () => {
-      setCaseLoading(true)
-      try {
-        const supabase = createClient()
-        const { data: unitRow } = await supabase
-          .from("units").select("id").eq("unit_number", unitId).single()
-        if (!unitRow) throw new Error("Unit not found")
-
-        const { data: cases, error } = await supabase
-          .from("case_studies")
-          .select(`
-            id, order_index, icon, title, subtitle, scenario, difficulty, profile,
-            case_study_questions (
-              id, order_index, question_text, correct_letter, explanation,
-              case_study_options ( letter, option_text, order_index )
-            ),
-            case_study_reflections ( order_index, reflection_text )
-          `)
-          .eq("unit_id", unitRow.id)
-          .order("order_index")
-
-        if (error) throw error
-        if (error) throw new Error("Failed to load case studies")
-        if (cases) setCaseStudies(cases as DBCaseStudy[])
-      } catch (err: any) {
-        console.error("Failed to load case studies:", err)
-        setCaseError(err.message ?? "Failed to load case studies")
-      } finally {
-        setCaseLoading(false)
-      }
-    }
-    fetchCases()
-  }, [unitId])
 
   if (!unit)
     return (
@@ -272,6 +147,24 @@ export default function UnitPage() {
     )
 
   // ── Actions ──
+  // ── Process quiz data from SWR ──
+  useEffect(() => {
+    if (!quizRawData) return
+    const LETTERS = ["A","B","C","D","E"]
+    const processed = (quizRawData as any[]).map((q: any) => {
+      const sorted = [...(q.answer_options ?? [])].sort((a: any, b: any) => a.order_index - b.order_index)
+      const correctIdx = sorted.findIndex((o: any) => o.is_correct)
+      return {
+        text: q.question_text,
+        diff: q.difficulty,
+        options: sorted.map((o: any, i: number) => ({ l: LETTERS[i], t: o.option_text })),
+        correct: LETTERS[correctIdx] ?? "A",
+        exp: q.explanation,
+      }
+    })
+    setQuizQuestions(processed)
+  }, [quizRawData])
+
   // ── Progress helpers ──────────────────────────────────────────────────────
   const getUnitDbId = async () => {
     const supabase = createClient()
