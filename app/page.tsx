@@ -1,4 +1,4 @@
-import Link from "next/link"
+﻿import Link from "next/link"
 
 export default function Home() {
   const stats = [
@@ -68,7 +68,7 @@ export default function Home() {
           ))}
         </div>
 
-        <p style={{ fontSize:"0.72rem", opacity:0.4 }}>© 2024 Elder Support Training PSW · All rights reserved</p>
+        <p style={{ fontSize:"0.72rem", opacity:0.4 }}>© 2024 Elder Support Training PSW · All rights reserved · <a href="/privacy" style="color:inherit;opacity:0.7">Privacy Policy</a> · <a href="/terms" style="color:inherit;opacity:0.7">Terms of Service</a></p>
       </div>
     </main>
   )
