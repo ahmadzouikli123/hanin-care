@@ -109,6 +109,7 @@ export default function UnitPage() {
   // ── Theory from Supabase ──
   const [dbTheory, setDbTheory] = useState<DBTheoryBlock[]>([])
   const [theoryLoading, setTheoryLoading] = useState(true)
+  const [theoryError, setTheoryError] = useState<string | null>(null)
 
   // ── Quiz from Supabase ──
   const [quizQuestions, setQuizQuestions] = useState<QuizQ[]>([])
@@ -118,6 +119,7 @@ export default function UnitPage() {
   // ── Case Studies from Supabase ──
   const [caseStudies, setCaseStudies] = useState<DBCaseStudy[]>([])
   const [caseLoading, setCaseLoading] = useState(true)
+  const [caseError, setCaseError] = useState<string | null>(null)
   const [activeCaseIdx, setActiveCaseIdx] = useState(0)
 
   // ── Auth ──
@@ -146,11 +148,13 @@ export default function UnitPage() {
           .eq("unit_id", unitRow.id)
           .order("order_index")
 
-        if (!error && blocks && blocks.length > 0) {
+        if (error) throw new Error("Failed to load theory content")
+        if (blocks && blocks.length > 0) {
           setDbTheory(blocks as DBTheoryBlock[])
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to load theory:", err)
+        setTheoryError(err.message ?? "Failed to load theory")
       } finally {
         setTheoryLoading(false)
       }
@@ -247,9 +251,11 @@ export default function UnitPage() {
           .order("order_index")
 
         if (error) throw error
+        if (error) throw new Error("Failed to load case studies")
         if (cases) setCaseStudies(cases as DBCaseStudy[])
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to load case studies:", err)
+        setCaseError(err.message ?? "Failed to load case studies")
       } finally {
         setCaseLoading(false)
       }
@@ -497,6 +503,16 @@ export default function UnitPage() {
                 <p style={{ fontSize:"0.9rem" }}>Loading theory content…</p>
               </div>
             ) : null}
+            {!theoryLoading && theoryError && dbTheory.length === 0 && (
+              <div style={{ background:"#FEF2F2", border:"1px solid #FCA5A5", borderRadius:12, padding:"1rem 1.25rem", marginBottom:"1.5rem", display:"flex", alignItems:"center", gap:"0.75rem" }}>
+                <span style={{ fontSize:"1.2rem" }}>⚠️</span>
+                <div>
+                  <div style={{ fontWeight:700, color:"#DC2626", fontSize:"0.88rem" }}>Failed to load theory content</div>
+                  <div style={{ fontSize:"0.8rem", color:"#991B1B", marginTop:"0.2rem" }}>Showing offline content — check your connection and refresh.</div>
+                </div>
+                <button onClick={() => window.location.reload()} style={{ marginLeft:"auto", background:"#DC2626", color:"white", border:"none", borderRadius:8, padding:"0.4rem 0.9rem", fontSize:"0.8rem", fontWeight:700, cursor:"pointer" }}>Retry</button>
+              </div>
+            )}
             {!theoryLoading && (dbTheory.length > 0 ? dbTheory : unit.theory).map((block: any, i: number) => (
               <div key={i} style={{ marginBottom: "2rem" }}>
                 {block.type === "heading" && (
@@ -864,18 +880,13 @@ export default function UnitPage() {
 
             {/* Error state */}
             {!quizLoading && quizError && (
-              <div
-                style={{
-                  background: "#FEF2F2",
-                  border: "1px solid #FCA5A5",
-                  borderRadius: 12,
-                  padding: "1.25rem",
-                  marginBottom: "1.5rem",
-                  color: "#DC2626",
-                  fontSize: "0.9rem",
-                }}
-              >
-                ⚠️ {quizError} — showing fallback questions.
+              <div style={{ background:"#FEF2F2", border:"1px solid #FCA5A5", borderRadius:12, padding:"1rem 1.25rem", marginBottom:"1.5rem", display:"flex", alignItems:"center", gap:"0.75rem" }}>
+                <span style={{ fontSize:"1.2rem" }}>⚠️</span>
+                <div>
+                  <div style={{ fontWeight:700, color:"#DC2626", fontSize:"0.88rem" }}>Failed to load quiz questions</div>
+                  <div style={{ fontSize:"0.8rem", color:"#991B1B", marginTop:"0.2rem" }}>{quizError} — {quizQuestions.length > 0 ? "showing fallback questions." : "no questions available."}</div>
+                </div>
+                <button onClick={() => window.location.reload()} style={{ marginLeft:"auto", background:"#DC2626", color:"white", border:"none", borderRadius:8, padding:"0.4rem 0.9rem", fontSize:"0.8rem", fontWeight:700, cursor:"pointer" }}>Retry</button>
               </div>
             )}
 
@@ -1178,6 +1189,15 @@ export default function UnitPage() {
               <div style={{ textAlign:"center", padding:"3rem", color:"var(--text-light)" }}>
                 <div style={{ fontSize:"2rem", marginBottom:"1rem" }}>⏳</div>
                 <p>Loading case studies...</p>
+              </div>
+            ) : !caseLoading && caseError && caseStudies.length === 0 ? (
+              <div style={{ background:"#FEF2F2", border:"1px solid #FCA5A5", borderRadius:12, padding:"1rem 1.25rem", display:"flex", alignItems:"center", gap:"0.75rem" }}>
+                <span style={{ fontSize:"1.2rem" }}>⚠️</span>
+                <div>
+                  <div style={{ fontWeight:700, color:"#DC2626", fontSize:"0.88rem" }}>Failed to load case studies</div>
+                  <div style={{ fontSize:"0.8rem", color:"#991B1B", marginTop:"0.2rem" }}>Check your connection and try again.</div>
+                </div>
+                <button onClick={() => window.location.reload()} style={{ marginLeft:"auto", background:"#DC2626", color:"white", border:"none", borderRadius:8, padding:"0.4rem 0.9rem", fontSize:"0.8rem", fontWeight:700, cursor:"pointer" }}>Retry</button>
               </div>
             ) : caseStudies.length === 0 && !unit.caseStudy ? (
               <div style={{ textAlign:"center", padding:"3rem", color:"var(--text-light)" }}>
