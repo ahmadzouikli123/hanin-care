@@ -165,6 +165,15 @@ export default function UnitPage() {
     setQuizQuestions(processed)
   }, [quizRawData])
 
+  // ── Track tab views ──
+  useEffect(() => {
+    if (tab === "theory" && userId) markTheoryViewed()
+  }, [tab, userId])
+
+  useEffect(() => {
+    if (tab === "case" && userId) markCaseCompleted()
+  }, [tab, userId])
+
   // ── Progress helpers ──────────────────────────────────────────────────────
   const getUnitDbId = async () => {
     const supabase = createClient()
@@ -386,7 +395,6 @@ export default function UnitPage() {
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "2.5rem 2rem" }}>
 
         {/* ── THEORY TAB ── */}
-        {tab === "theory" && markTheoryViewed()}
         {tab === "theory" && (
           <div>
             <UnitVideo unitId={unitId} levelColor={lc.color} />
@@ -1075,7 +1083,6 @@ export default function UnitPage() {
         )}
 
         {/* ── CASE STUDY TAB ── */}
-        {tab === "case" && markCaseCompleted()}
         {tab === "case" && (
           <div>
             {caseLoading ? (
